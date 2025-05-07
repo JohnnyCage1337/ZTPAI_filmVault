@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+
+# Django
+/backend/db.sqlite3
+/backend/staticfiles/
+
+# Virtualenv
+venv/
+
+# Docker
+**/postgres_data/
+**/docker-compose.override.yml
