@@ -1,25 +1,13 @@
-version: '3.8'
-services:
-  db:
-    image: postgres:15
-    env_file:
-      - .env
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+version: "3.8"
 
+services:
   web:
     build:
       context: ./backend
     env_file:
-      - .env
+      - .env           # w tym pliku jest DATABASE_URL
     volumes:
-      - ./backend:/app
+      - ./backend:/app # opcjonalnie, jeżeli chcesz live-reload przy dev
     ports:
       - "8000:8000"
-    depends_on:
-      - db
-
-volumes:
-  postgres_data:
+    # brak depends_on: db ─ nie mamy lokalnego Postgresa

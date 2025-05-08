@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.http import HttpResponse
 
 urlpatterns = [
@@ -24,4 +24,6 @@ urlpatterns = [
 
     # Prosty endpoint testowy
     path('ping/', lambda request: HttpResponse('pong'), name='ping'),
+
+    path('titles/', include("titles.urls")),
 ]
