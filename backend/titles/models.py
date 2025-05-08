@@ -46,4 +46,34 @@ class TVSeries(TitleBase):
     def __str__(self):
         return self.title
     
-class Season()
+class Season(models.Model):
+    tv_series = models.ForeignKey(TVSeries, on_delete=models.CASCADE)
+    season_number = models.PositiveSmallIntegerField(help_text="Season number")
+    episodes_count = models.PositiveSmallIntegerField(default=0, help_text="Number of episodes in this season")
+    release_date = models.DateField(null=True, blank=True, help_text="Release date of this season.")
+    description = models.TextField(blank=True)
+    poster_url = models.URLField(blank=True)
+
+    def __str__(self):
+        return f"{self.tv_series.title} - Season {self.season_number}"
+    
+    class Meta:
+        unique_together = ("tv_series", "season_number")
+        ordering = ["season_number"]
+
+
+class Episode(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    title = models.CharField(max_length=256)
+    episode_number = models.PositiveSmallIntegerField(help_text="Duration in minutes")
+    runtime = models.SmallIntegerField(default = 0)
+    description = models.TextField(blank=True)
+    release_date = models.DateField(null=True, blank=True, help_text="Air date of episode")
+    poster_url = models.URLField(blank=True)
+
+    class Meta:
+        unique_together = ("season", "episode_number")
+
+    def __str__(self):
+        return f"S{self.season.season_number}.E{self.episode_number}:{self.title}"
+
