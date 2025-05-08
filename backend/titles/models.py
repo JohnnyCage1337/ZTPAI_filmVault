@@ -38,3 +38,12 @@ class TitleBase(models.Model):
 class Film(TitleBase):
     def __str__(self):
         return self.title
+
+
+class TVSeries(TitleBase):
+    seasons_amount = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return self.title
+    
+class Season()
