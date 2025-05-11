@@ -5,9 +5,10 @@ services:
     build:
       context: ./backend
     env_file:
-      - .env           # w tym pliku jest DATABASE_URL
+      - .env
     volumes:
-      - ./backend:/app # opcjonalnie, jeżeli chcesz live-reload przy dev
+      - ./backend:/app
     ports:
       - "8000:8000"
-    # brak depends_on: db ─ nie mamy lokalnego Postgresa
+    environment:
+      - CORS_ALLOW_ALL_ORIGINS=True

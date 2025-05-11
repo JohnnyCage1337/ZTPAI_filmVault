@@ -1,6 +1,8 @@
 # titles/views.py
 from django.http import JsonResponse
 from .models import Film
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 def film_list(request):
     if request.method == "GET":
@@ -26,3 +28,9 @@ def film_detail(request, film_id):
             return JsonResponse(data)
         except Film.DoesNotExist:
             return JsonResponse({"error": "Film not found"}, status=404)
+        
+
+
+class HelloWorldView(APIView):
+    def get(self, request):
+        return Response({"message": "Hello, world!"})

@@ -1,7 +1,7 @@
 # etap build
 FROM python:3.13-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache libpq       # tylko runtime’owa libpq
+RUN apk add --no-cache libpq       # runtime’owa libpq
 COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
