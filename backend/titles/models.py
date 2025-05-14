@@ -4,13 +4,16 @@ from django.db import models
 
 
 class Country(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
+    
+    
+
 
 class Language(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
@@ -42,6 +45,7 @@ class Film(TitleBase):
 
 class TVSeries(TitleBase):
     seasons_amount = models.PositiveSmallIntegerField(default=0)
+    year_last_season = models.PositiveSmallIntegerField(null = True, blank = True, default=None)
 
     def __str__(self):
         return self.title

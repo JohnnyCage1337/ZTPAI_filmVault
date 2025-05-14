@@ -1,36 +1,52 @@
-# titles/views.py
-from django.http import JsonResponse
-from .models import Film
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
+from django.http import Http404
+from .models import Film
+from .serializers import FilmSerializer
 
-def film_list(request):
-    if request.method == "GET":
-        # Pobierz wszystkie filmy z bazy danych
+class FilmList(APIView):
+    """
+    List all Films or create a new one
+    """
+    def get(self, request, format=None):
         films = Film.objects.all()
-        # Serializacja danych do formatu JSON
-        data = [{"id": film.id, "title": film.title, "year": film.year} for film in films]
-        return JsonResponse(data, safe=False)
+        serializer = FilmSerializer(films, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, format=None):
+        serializer = FilmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
-def film_detail(request, film_id):
-    if request.method == "GET":
+class FilmDetail(APIView):
+    """
+    Retrieve, update or delete a film instance
+    """
+
+    def get_object(self, pk):
         try:
-            # Pobierz film o danym ID
-            film = Film.objects.get(pk=film_id)
-            # Serializacja danych do formatu JSON
-            data = {
-                "id": film.id,
-                "title": film.title,
-                "year": film.year,
-                "runtime": film.runtime,
-                "plot": film.plot,
-            }
-            return JsonResponse(data)
+            return Film.objects.get(pk=pk)
         except Film.DoesNotExist:
-            return JsonResponse({"error": "Film not found"}, status=404)
+            raise Http404
         
-
-
-class HelloWorldView(APIView):
-    def get(self, request):
-        return Response({"message": "Hello, world!"})
+    def get(self, request, pk, format=None):
+        film = self.get_object(pk)
+        serializer = FilmSerializer(film)
+        return Response(serializer.data)
+    
+    def put(self, request, pk, format=None):
+        film = self.get_object(pk)
+        serializer = FilmSerializer(film, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk, format=None):
+        film = self.get_object(pk)
+        film.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
