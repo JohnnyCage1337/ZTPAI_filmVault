@@ -1,3 +1,6 @@
+#Wygenerowany skrypt z chatagpt do zapelnienia tabel Country i Language
+
+
 from django.core.management.base import BaseCommand
 from titles.models import Country, Language
 
