@@ -44,19 +44,26 @@ class Film(TitleBase):
 
 
 class TVSeries(TitleBase):
-    seasons_amount = models.PositiveSmallIntegerField(default=0)
     year_last_season = models.PositiveSmallIntegerField(null = True, blank = True, default=None)
 
+    @property
+    def seasons_amount(self):
+        return self.seasons.count()
+    
     def __str__(self):
         return self.title
     
 class Season(models.Model):
     tv_series = models.ForeignKey(TVSeries, on_delete=models.CASCADE)
     season_number = models.PositiveSmallIntegerField(help_text="Season number")
-    episodes_count = models.PositiveSmallIntegerField(default=0, help_text="Number of episodes in this season")
-    release_date = models.DateField(null=True, blank=True, help_text="Release date of this season.")
+    release_date = models.DateField(null=True, blank=True, help_text="Air date of episode")
     description = models.TextField(blank=True)
     poster_url = models.URLField(blank=True)
+
+    @property
+    def episodes_count(self):
+        return self.episode_set.count()
+
 
     def __str__(self):
         return f"{self.tv_series.title} - Season {self.season_number}"

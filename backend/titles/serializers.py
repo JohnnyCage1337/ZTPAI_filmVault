@@ -23,6 +23,7 @@ class FilmSerializer(serializers.ModelSerializer):
 class TVSeriesSerializer(serializers.ModelSerializer):
     country = serializers.PrimaryKeyRelatedField(many=True, queryset=Country.objects.all())
     languages = serializers.PrimaryKeyRelatedField(many=True, queryset=Language.objects.all())
+    seasons_amount = serializers.ReadOnlyField()
 
     class Meta:
         model = TVSeries
@@ -31,7 +32,8 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
 class SeasonSerializer(serializers.ModelSerializer):
     tv_series = serializers.PrimaryKeyRelatedField(queryset=TVSeries.objects.all())
-
+    episodes_count = serializers.ReadOnlyField()
+    
     class Meta:
         model = Season
         fields = ['id', 'tv_series', 'season_number', 'episodes_count', 'release_date', 'description', 'poster_url']

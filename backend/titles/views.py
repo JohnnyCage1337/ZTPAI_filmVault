@@ -1,10 +1,6 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import mixins, generics
-from django.http import Http404
-from .models import Film, TVSeries
-from .serializers import FilmSerializer, TVSeriesSerializer
+from rest_framework import generics
+from .models import Film, TVSeries, Season, Episode
+from .serializers import FilmSerializer, TVSeriesSerializer, SeasonSerializer, EpisodeSerializer
 
 class FilmList(generics.ListCreateAPIView):
     queryset = Film.objects.all()
@@ -21,3 +17,20 @@ class TVSeriesList(generics.ListCreateAPIView):
 class TVSeriesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TVSeries.objects.all()
     serializer_class = TVSeriesSerializer
+
+
+class SeasonList(generics.ListCreateAPIView):
+    queryset = Season.objects.all()
+    serializer_class = SeasonSerializer
+
+class SeasonDetail(generics.RetrieveDestroyAPIView):
+    queryset = Season.objects.all()
+    serializer_class = SeasonSerializer
+
+class EpisodeList(generics.ListCreateAPIView):
+    queryset = Episode.objects.all()
+    serializer_class = EpisodeSerializer
+
+class EpisodeDetail(generics.RetrieveDestroyAPIView):
+    queryset = Episode.objects.all()
+    serializer_class = EpisodeSerializer
