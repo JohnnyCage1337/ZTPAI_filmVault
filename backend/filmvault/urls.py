@@ -5,6 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('titles.urls')),  # Włączenie ścieżek API z aplikacji titles
+    path('api/', include('people.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
-from django.contrib.contenttypes.models import ContentType
-from people.models import Person
 from people.models import Credit
 
 
@@ -20,14 +18,14 @@ class Language(models.Model):
 
 
 class TitleBase(models.Model):
-    title = models.CharField(max_length=256, help_text="Title in English")
-    title_og = models.CharField(max_length=256, help_text="Original title", blank=True)
+    title = models.CharField(max_length=256)
+    title_og = models.CharField(max_length=256, blank=True)
     plot = models.TextField(blank=True)
     year = models.IntegerField()
-    runtime = models.SmallIntegerField(null=True, help_text="Minutes")
+    runtime = models.SmallIntegerField(null=True)
     poster_url = models.URLField(blank=True)
-    country = models.ManyToManyField(Country, help_text="Country of production")
-    languages = models.ManyToManyField(Language, help_text="Languages used")
+    country = models.ManyToManyField(Country)
+    languages = models.ManyToManyField(Language)
 
     class Meta:
         abstract = True
@@ -36,10 +34,13 @@ class TitleBase(models.Model):
 
 
 class Film(TitleBase):
-    credits = GenericRelation(Credit,
-                              content_type_field='content_type',
-                              object_id_field='object_id',
-                              related_query_name='films')
+    # Credits directly on Film
+    credits = GenericRelation(
+        Credit,
+        content_type_field='content_type',
+        object_id_field='object_id',
+        related_query_name='films'
+    )
 
     def __str__(self):
         return self.title
@@ -47,10 +48,13 @@ class Film(TitleBase):
 
 class TVSeries(TitleBase):
     year_last_season = models.PositiveSmallIntegerField(null=True, blank=True)
-    credits = GenericRelation(Credit,
-                              content_type_field='content_type',
-                              object_id_field='object_id',
-                              related_query_name='tvseries')
+    # Credits applied at series level
+    credits = GenericRelation(
+        Credit,
+        content_type_field='content_type',
+        object_id_field='object_id',
+        related_query_name='tvseries'
+    )
 
     @property
     def seasons_amount(self):
@@ -62,14 +66,10 @@ class TVSeries(TitleBase):
 
 class Season(models.Model):
     tv_series = models.ForeignKey(TVSeries, on_delete=models.CASCADE, related_name='seasons')
-    season_number = models.PositiveSmallIntegerField(help_text="Season number")
-    release_date = models.DateField(null=True, blank=True, help_text="Air date of season")
+    season_number = models.PositiveSmallIntegerField()
+    release_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
     poster_url = models.URLField(blank=True)
-    credits = GenericRelation(Credit,
-                              content_type_field='content_type',
-                              object_id_field='object_id',
-                              related_query_name='seasons')
 
     class Meta:
         unique_together = ("tv_series", "season_number")
@@ -80,21 +80,24 @@ class Season(models.Model):
 
     @property
     def episodes_count(self):
-        return self.episode_set.count()
+        return self.episodes.count()
 
 
 class Episode(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='episodes')
     title = models.CharField(max_length=256)
-    episode_number = models.PositiveSmallIntegerField(help_text="Episode number")
+    episode_number = models.PositiveSmallIntegerField()
     runtime = models.SmallIntegerField(default=0)
     description = models.TextField(blank=True)
-    release_date = models.DateField(null=True, blank=True, help_text="Air date of episode")
+    release_date = models.DateField(null=True, blank=True)
     poster_url = models.URLField(blank=True)
-    credits = GenericRelation(Credit,
-                              content_type_field='content_type',
-                              object_id_field='object_id',
-                              related_query_name='episodes')
+    # Credits can be linked at episode level for episode-specific roles
+    credits = GenericRelation(
+        Credit,
+        content_type_field='content_type',
+        object_id_field='object_id',
+        related_query_name='episodes'
+    )
 
     class Meta:
         unique_together = ("season", "episode_number")

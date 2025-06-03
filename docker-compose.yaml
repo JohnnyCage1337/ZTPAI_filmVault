@@ -1,14 +1,28 @@
 version: "3.8"
 
 services:
-  web:
+  web: # Django / DRF
     build:
       context: ./backend
     env_file:
       - .env
     volumes:
       - ./backend:/app
-    ports:
-      - "8000:8000"
+    ports: ["8000:8000"]
     environment:
       - CORS_ALLOW_ALL_ORIGINS=True
+
+  frontend: # React + Vite DEV
+    build:
+      context: ./frontend
+      target: build # stage z Node’em
+    command: npm run dev -- --host --port 5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=250
+      - WATCHPACK_POLLING=true
+    ports: ["5173:5173"]
+    depends_on: [web]

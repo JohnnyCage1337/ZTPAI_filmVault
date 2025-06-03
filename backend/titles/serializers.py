@@ -1,47 +1,47 @@
 from rest_framework import serializers
-from .models import Country, Language, Film, TVSeries, Season, Episode
-
-class CountrySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Country
-        fields = ['id', 'name']
-
-class LanguageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Language
-        fields = ['id', 'name']
+from titles.models import Film, TVSeries, Season, Episode
+from people.serializers import CreditSerializer
 
 class FilmSerializer(serializers.ModelSerializer):
-    # Używamy PrimaryKeyRelatedField, aby zwrócić tylko ID krajów i języków
-    country = serializers.PrimaryKeyRelatedField(many=True, queryset=Country.objects.all())
-    languages = serializers.PrimaryKeyRelatedField(many=True, queryset=Language.objects.all())
-
+    credits = serializers.SerializerMethodField()
     class Meta:
         model = Film
-        fields = ['id', 'title', 'title_og', 'plot', 'year', 'runtime', 'poster_url', 'country', 'languages']
+        fields = ['id', 'title', 'plot', 'year', 'runtime', 'credits']
+    def get_credits(self, obj):
+        qs = obj.credits.all().order_by('billing_order')
+        return CreditSerializer(qs, many=True).data
 
 class TVSeriesSerializer(serializers.ModelSerializer):
-    country = serializers.PrimaryKeyRelatedField(many=True, queryset=Country.objects.all())
-    languages = serializers.PrimaryKeyRelatedField(many=True, queryset=Language.objects.all())
+    credits = serializers.SerializerMethodField()
     seasons_amount = serializers.ReadOnlyField()
-
     class Meta:
         model = TVSeries
-        fields = ['id', 'title', 'title_og', 'plot', 'year', 'year_last_season', 'runtime',
-                  'poster_url', 'country', 'languages', 'seasons_amount']
+        fields = ['id', 'title', 'plot', 'year', 'year_last_season', 'runtime', 'seasons_amount', 'credits']
+    def get_credits(self, obj):
+        qs = obj.credits.all().order_by('billing_order')
+        return CreditSerializer(qs, many=True).data
 
 class SeasonSerializer(serializers.ModelSerializer):
-    tv_series = serializers.PrimaryKeyRelatedField(queryset=TVSeries.objects.all())
     episodes_count = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Season
-        fields = ['id', 'tv_series', 'season_number', 'episodes_count', 'release_date', 'description', 'poster_url']
+        fields = [
+            'id',
+            'tv_series',
+            'season_number',
+            'episodes_count',
+            'release_date',
+            'description',
+            'poster_url',
+        ]
 
 
 class EpisodeSerializer(serializers.ModelSerializer):
-    season = serializers.PrimaryKeyRelatedField(queryset=Season.objects.all())
-
+    credits = serializers.SerializerMethodField()
     class Meta:
         model = Episode
-        fields = ['id', 'season', 'title', 'episode_number', 'runtime', 'description', 'release_date', 'poster_url']
+        fields = ['id', 'season', 'title', 'episode_number', 'runtime', 'release_date', 'credits']
+    def get_credits(self, obj):
+        qs = obj.credits.all().order_by('billing_order')
+        return CreditSerializer(qs, many=True).data
