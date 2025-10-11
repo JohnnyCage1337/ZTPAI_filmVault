@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
@@ -10,6 +10,7 @@ def api_test(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/test/', api_test, name='api_test'),
+    path('movies/', include('movies.urls')),
 ]
 
 # Obsługa plików media w trybie deweloperskim
