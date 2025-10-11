@@ -6,7 +6,7 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ['id', 'name', 'slug']
 
-class MovieListSerializer(serializers.ModelSerialzer):
+class MovieListSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True, read_only = True)
     year = serializers.ReadOnlyField()
 
@@ -46,7 +46,7 @@ class MovieCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = [
-            'title', 'original_title', 'overview', 'release_date', 'runtime',
+            'title', 'og_title', 'overview', 'release_date', 'runtime',
             'budget', 'revenue', 'status', 'adult', 'poster', 'backdrop',
             'trailer_url', 'imdb_id', 'genre_ids'
         ]
