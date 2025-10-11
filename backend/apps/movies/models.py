@@ -50,7 +50,7 @@ class Movie(BaseContent):
 
     class Meta:
         db_table = 'movies'
-        ordering = ['release_date', ['-popularity']]
+        ordering = ['-release_date', '-popularity']
         indexes = [
             models.Index(fields=['-release_date', '-popularity']),
             models.Index(fields=['title']),
