@@ -4,11 +4,13 @@ import RegisterPage from './components/RegisterPage';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/public/Home';
+import MovieDetail from './pages/public/MovieDetail';
 
 function App() {
-  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'home'
+  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'home', 'movie-detail'
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   // Sprawdzenie czy użytkownik jest zalogowany przy starcie
   useEffect(() => {
@@ -26,7 +28,7 @@ function App() {
         setUser(data.user);
         setCurrentView('home');
       }
-    } catch (error) {
+    } catch {
       console.log('Not authenticated');
     } finally {
       setIsLoading(false);
@@ -58,6 +60,16 @@ function App() {
 
   const switchToLogin = () => {
     setCurrentView('login');
+  };
+
+  const handleMovieSelect = (movie) => {
+    setSelectedMovie(movie);
+    setCurrentView('movie-detail');
+  };
+
+  const handleBackToHome = () => {
+    setSelectedMovie(null);
+    setCurrentView('home');
   };
 
   if (isLoading) {
@@ -99,7 +111,18 @@ function App() {
     return (
       <>
         <Navbar user={user} onLogout={handleLogout} />
-        <Home />
+        <Home onMovieSelect={handleMovieSelect} />
+        <Footer />
+      </>
+    );
+  }
+
+  // Renderowanie szczegółów filmu
+  if (currentView === 'movie-detail' && user && selectedMovie) {
+    return (
+      <>
+        <Navbar user={user} onLogout={handleLogout} />
+        <MovieDetail movieId={selectedMovie.id} onBack={handleBackToHome} />
         <Footer />
       </>
     );
