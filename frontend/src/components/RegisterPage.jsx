@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const RegisterPage = ({ onSwitchToLogin }) => {
+const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -42,18 +42,23 @@ const RegisterPage = ({ onSwitchToLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess('Account created successfully! You can now log in.');
-        setFormData({
-          username: '',
-          email: '',
-          first_name: '',
-          last_name: '',
-          password: '',
-          password_confirm: ''
-        });
-        setTimeout(() => {
-          onSwitchToLogin();
-        }, 2000);
+        // Po rejestracji automatycznie zaloguj użytkownika
+        if (onRegister) {
+          onRegister(data.user);
+        } else {
+          setSuccess('Account created successfully! You can now log in.');
+          setFormData({
+            username: '',
+            email: '',
+            first_name: '',
+            last_name: '',
+            password: '',
+            password_confirm: ''
+          });
+          setTimeout(() => {
+            onSwitchToLogin();
+          }, 2000);
+        }
       } else {
         if (data.username) {
           setError(data.username[0]);
@@ -436,8 +441,8 @@ const RegisterPage = ({ onSwitchToLogin }) => {
             style={{
               width: '100%',
               padding: '16px',
-              background: loading 
-                ? 'rgba(79, 70, 229, 0.5)' 
+              background: loading
+                ? 'rgba(79, 70, 229, 0.5)'
                 : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
               border: 'none',
               borderRadius: '12px',

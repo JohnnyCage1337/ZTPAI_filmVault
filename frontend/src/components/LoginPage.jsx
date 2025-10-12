@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const LoginPage = ({ onSwitchToRegister }) => {
+const LoginPage = ({ onSwitchToRegister, onLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -39,8 +39,10 @@ const LoginPage = ({ onSwitchToRegister }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert(`🎬 Login successful! Welcome ${data.user.first_name || data.user.username}!`);
-        // Tutaj można dodać redirect do głównej strony
+        // Wywołaj callback z danymi użytkownika
+        if (onLogin) {
+          onLogin(data.user);
+        }
       } else {
         if (data.non_field_errors) {
           setError(data.non_field_errors[0]);
@@ -64,7 +66,7 @@ const LoginPage = ({ onSwitchToRegister }) => {
 
     const creds = demoCredentials[userType];
     setFormData({ ...formData, ...creds });
-    
+
     // Automatyczne logowanie po ustawieniu danych demo
     setTimeout(() => {
       const fakeEvent = { preventDefault: () => {} };
