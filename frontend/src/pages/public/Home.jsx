@@ -8,9 +8,6 @@ const Home = ({ onMovieSelect }) => {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -52,31 +49,6 @@ const Home = ({ onMovieSelect }) => {
       return () => clearInterval(interval);
     }
   }, [heroMovies]);
-
-  // Handle search
-  const handleSearch = async (query) => {
-    if (query.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      setIsSearching(true);
-      const results = await movieService.searchMovies(query);
-      setSearchResults(results.results || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Clear search
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-  };
 
   const MovieCard = ({ movie, type = 'movie', onMovieSelect }) => (
     <div
@@ -291,142 +263,7 @@ const Home = ({ onMovieSelect }) => {
       minHeight: '100vh',
       paddingTop: '80px'
     }}>
-      {/* Search Bar */}
-      <section style={{ padding: '40px 0 20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div className="container">
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.8)',
-            borderRadius: '16px',
-            padding: '32px',
-            border: '1px solid rgba(79, 70, 229, 0.2)',
-            textAlign: 'center'
-          }}>
-            <h2 style={{
-              color: '#e2e8f0',
-              fontSize: '2rem',
-              fontWeight: '700',
-              marginBottom: '24px',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-            }}>
-              🎬 Znajdź swój film
-            </h2>
-            
-            <div style={{ position: 'relative', maxWidth: '600px', margin: '0 auto' }}>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  handleSearch(e.target.value);
-                }}
-                placeholder="Wyszukaj filmy..."
-                style={{
-                  width: '100%',
-                  padding: '16px 50px 16px 20px',
-                  borderRadius: '12px',
-                  border: '2px solid rgba(79, 70, 229, 0.3)',
-                  background: 'rgba(15, 23, 42, 0.9)',
-                  color: '#e2e8f0',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-              
-              {searchQuery && (
-                <button
-                  onClick={clearSearch}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'rgba(79, 70, 229, 0.2)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    color: '#e2e8f0',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  ✕
-                </button>
-              )}
-              
-              {isSearching && (
-                <div style={{
-                  position: 'absolute',
-                  right: searchQuery ? '60px' : '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#4f46e5'
-                }}>
-                  ⏳
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Search Results */}
-      {searchQuery && searchResults.length > 0 && (
-        <section style={{ padding: '0 0 40px', maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="container">
-            <h3 style={{
-              color: '#e2e8f0',
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              marginBottom: '24px',
-              textAlign: 'center'
-            }}>
-              Wyniki wyszukiwania ({searchResults.length})
-            </h3>
-            
-            <div className="row">
-              {searchResults.map(movie => (
-                <div key={movie.id} className="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
-                  <MovieCard 
-                    movie={movie} 
-                    onMovieSelect={onMovieSelect} 
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Show message when search has no results */}
-      {searchQuery && searchResults.length === 0 && !isSearching && (
-        <section style={{ padding: '0 0 40px', maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="container">
-            <div style={{
-              background: 'rgba(15, 23, 42, 0.8)',
-              borderRadius: '12px',
-              padding: '40px',
-              textAlign: 'center',
-              border: '1px solid rgba(79, 70, 229, 0.2)'
-            }}>
-              <p style={{ color: '#94a3b8', fontSize: '18px', margin: 0 }}>
-                Nie znaleziono filmów dla "{searchQuery}"
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Hero Carousel - only show when not searching */}
-      {!searchQuery && (
+      {/* Hero Carousel */}
       <section style={{
         height: '70vh',
         position: 'relative',
@@ -575,10 +412,8 @@ const Home = ({ onMovieSelect }) => {
           ))}
         </div>
       </section>
-      )}
 
-      {/* Main sections - only show when not searching */}
-      {!searchQuery && (
+      {/* Main sections */}
       <div className="container">
         {/* Trending Movies */}
         <section style={{ marginBottom: '80px' }}>
@@ -625,7 +460,6 @@ const Home = ({ onMovieSelect }) => {
           </div>
         </section>
       </div>
-      )}
     </div>
   );
 };

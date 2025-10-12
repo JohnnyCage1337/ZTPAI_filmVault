@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/public/Home';
 import MovieDetail from './pages/public/MovieDetail';
+import SearchResults from './pages/public/SearchResults';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -94,6 +95,7 @@ function App() {
       <Navbar user={user} onLogout={handleLogout} onLogin={() => navigate('/login')} />
       <Routes>
         <Route path="/" element={<Home onMovieSelect={handleMovieSelect} />} />
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/movie/:slug" element={<MovieDetail onBack={() => navigate('/')} />} />
         <Route path="/login" element={
           <LoginPage

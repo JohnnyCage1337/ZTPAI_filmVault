@@ -1,5 +1,69 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+const SearchInput = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Szukaj filmów..."
+        style={{
+          width: '300px',
+          padding: '8px 40px 8px 16px',
+          borderRadius: '20px',
+          border: '1px solid rgba(79, 70, 229, 0.3)',
+          background: 'rgba(15, 23, 42, 0.8)',
+          color: '#e2e8f0',
+          fontSize: '14px',
+          outline: 'none',
+          transition: 'all 0.3s ease'
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = '#4f46e5';
+          e.target.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.1)';
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+          e.target.style.boxShadow = 'none';
+        }}
+      />
+      <button
+        type="submit"
+        style={{
+          position: 'absolute',
+          right: '8px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'rgba(79, 70, 229, 0.2)',
+          border: 'none',
+          borderRadius: '50%',
+          width: '24px',
+          height: '24px',
+          color: '#a78bfa',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '12px'
+        }}
+      >
+        🔍
+      </button>
+    </form>
+  );
+};
 
 const Navbar = ({ user, onLogout, onLogin }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,7 +108,6 @@ const Navbar = ({ user, onLogout, onLogin }) => {
   const navigationItems = [
     { name: 'Home', icon: '🏠' },
     { name: 'Movies', icon: '🎭' },
-    { name: 'TV Shows', icon: '📺' },
     { name: 'Genres', icon: '🎪' },
     { name: 'My List', icon: '📝' }
   ];
@@ -58,12 +121,13 @@ const Navbar = ({ user, onLogout, onLogin }) => {
         right: 0,
         zIndex: 1000,
         background: isScrolled
-          ? 'rgba(15, 23, 42, 0.95)'
+          ? 'rgba(15, 23, 42, 0.98)'
           : 'linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, transparent 100%)',
         backdropFilter: isScrolled ? 'blur(20px)' : 'none',
         transition: 'all 0.3s ease',
         padding: '12px 0',
-        borderBottom: isScrolled ? '1px solid rgba(79, 70, 229, 0.2)' : 'none'
+        borderBottom: isScrolled ? '1px solid rgba(79, 70, 229, 0.3)' : 'none',
+        boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'
       }}>
         <div className="container">
           <div style={{
@@ -156,39 +220,8 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                 alignItems: 'center',
                 gap: '15px'
               }}>
-                {/* Search */}
-                <button style={{
-                  background: 'rgba(79, 70, 229, 0.1)',
-                  border: '1px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  color: '#a78bfa',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease'
-                }}>
-                  🔍
-                </button>
-
-                {/* Notifications */}
-                <button style={{
-                  background: 'rgba(79, 70, 229, 0.1)',
-                  border: '1px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  color: '#a78bfa',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease'
-                }}>
-                  🔔
-                </button>
+                {/* Search Input */}
+                <SearchInput />
 
                 {/* User Profile */}
                 {user ? (
@@ -388,49 +421,9 @@ const Navbar = ({ user, onLogout, onLogin }) => {
             ))}
           </div>
 
-          {/* Mobile Quick Actions */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginBottom: '30px'
-          }}>
-            <button style={{
-              background: 'rgba(79, 70, 229, 0.1)',
-              border: '1px solid rgba(79, 70, 229, 0.3)',
-              borderRadius: '12px',
-              padding: '16px',
-              color: '#a78bfa',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              fontWeight: '500',
-              transition: 'all 0.3s ease'
-            }}>
-              <span>🔍</span>
-              Search
-            </button>
-            <button style={{
-              background: 'rgba(79, 70, 229, 0.1)',
-              border: '1px solid rgba(79, 70, 229, 0.3)',
-              borderRadius: '12px',
-              padding: '16px',
-              color: '#a78bfa',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              fontWeight: '500',
-              transition: 'all 0.3s ease'
-            }}>
-              <span>🔔</span>
-              Alerts
-            </button>
+          {/* Mobile Search */}
+          <div style={{ marginBottom: '30px' }}>
+            <SearchInput />
           </div>
 
           {/* Mobile User Section */}
