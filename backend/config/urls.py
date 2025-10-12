@@ -9,8 +9,9 @@ def api_test(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.movies.urls')),  # ← DODAJ TO!
-
+    path('', include('apps.movies.urls')),
+    path('', include('users.urls')),  # Dodajemy URLs autentykacji
+    path('api/test/', api_test, name='api_test'),
 ]
 
 # Obsługa plików media w trybie deweloperskim

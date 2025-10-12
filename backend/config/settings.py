@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from decouple import config
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-filmvault-secret-key-change-me')
@@ -21,7 +22,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'apps.movies',
-    # 'accounts',
+    'users',  # Nowa aplikacja users
     # 'interactions',
     # 'people',
 ]
