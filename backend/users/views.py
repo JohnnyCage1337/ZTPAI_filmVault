@@ -2,10 +2,13 @@ from rest_framework import status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.auth import login, logout
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -15,12 +18,15 @@ def register_view(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
         return Response({
             'message': 'User created successfully',
-            'user': UserSerializer(user).data
+            'user': UserSerializer(user).data,
+            'token': token.key
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -30,10 +36,11 @@ def login_view(request):
     serializer = UserLoginSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.validated_data['user']
-        login(request, user)
+        token, created = Token.objects.get_or_create(user=user)
         return Response({
             'message': 'Login successful',
-            'user': UserSerializer(user).data
+            'user': UserSerializer(user).data,
+            'token': token.key
         }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -41,12 +48,17 @@ def login_view(request):
 @permission_classes([IsAuthenticated])
 def logout_view(request):
     """
-    Wylogowanie użytkownika
+    Wylogowanie użytkownika - usuwa token
     """
-    logout(request)
-    return Response({
-        'message': 'Logout successful'
-    }, status=status.HTTP_200_OK)
+    try:
+        request.user.auth_token.delete()
+        return Response({
+            'message': 'Logout successful'
+        }, status=status.HTTP_200_OK)
+    except:
+        return Response({
+            'message': 'Logout successful'
+        }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
