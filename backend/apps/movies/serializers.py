@@ -24,7 +24,7 @@ class MovieListSerializer(serializers.ModelSerializer):
     average_rating = serializers.ReadOnlyField()
     rating_count = serializers.ReadOnlyField()
     poster = serializers.SerializerMethodField()
-    
+
     def get_poster(self, obj):
         if obj.poster:
             request = self.context.get('request')
@@ -52,7 +52,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     rating_count = serializers.ReadOnlyField()
     poster = serializers.SerializerMethodField()
     background = serializers.SerializerMethodField()
-    
+
     def get_poster(self, obj):
         if obj.poster:
             request = self.context.get('request')
@@ -60,7 +60,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.poster.url)
             return f"/media/{obj.poster}"
         return None
-    
+
     def get_background(self, obj):
         if obj.background:
             request = self.context.get('request')

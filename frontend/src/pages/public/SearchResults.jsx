@@ -8,7 +8,7 @@ const SearchResults = () => {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const query = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const SearchResults = () => {
         position: 'relative'
       }}>
         {!movie.poster && '🎬'}
-        
+
         <div style={{
           position: 'absolute',
           top: '10px',

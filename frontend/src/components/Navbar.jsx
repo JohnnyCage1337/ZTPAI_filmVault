@@ -71,9 +71,23 @@ const Navbar = ({ user, onLogout, onLogin }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const scrolled = window.pageYOffset > 50;
+      console.log('Scroll position:', window.pageYOffset, 'Is scrolled:', scrolled);
+      setIsScrolled(scrolled);
     };
 
+    // Check initial scroll position
+    handleScroll();
+
+    // Add event listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
       // Close mobile menu on desktop resize
       if (window.innerWidth >= 768) {
@@ -90,12 +104,10 @@ const Navbar = ({ user, onLogout, onLogin }) => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -121,13 +133,14 @@ const Navbar = ({ user, onLogout, onLogin }) => {
         right: 0,
         zIndex: 1000,
         background: isScrolled
-          ? 'rgba(15, 23, 42, 0.98)'
-          : 'linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, transparent 100%)',
-        backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+          ? 'rgba(15, 23, 42, 0.95)'
+          : 'linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.4) 50%, transparent 100%)',
+        backdropFilter: isScrolled ? 'blur(20px)' : 'blur(5px)',
+        WebkitBackdropFilter: isScrolled ? 'blur(20px)' : 'blur(5px)',
         transition: 'all 0.3s ease',
         padding: '12px 0',
         borderBottom: isScrolled ? '1px solid rgba(79, 70, 229, 0.3)' : 'none',
-        boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'
+        boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.4)' : 'none'
       }}>
         <div className="container">
           <div style={{
@@ -211,9 +224,7 @@ const Navbar = ({ user, onLogout, onLogin }) => {
             </div>
 
             {/* Desktop User Menu */}
-            <div style={{
-              display: 'none'
-            }} className="d-none d-md-flex">
+            <div className="d-none d-md-flex">
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
