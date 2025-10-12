@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import movieService from '../../services/movieService';
 
-const MovieDetail = ({ movieId, onBack }) => {
+const MovieDetail = ({ onBack }) => {
+  const { slug } = useParams();
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRating, setUserRating] = useState(0);
@@ -12,15 +14,15 @@ const MovieDetail = ({ movieId, onBack }) => {
       try {
         setIsLoading(true);
 
-        // Używamy movieId jako slug (zakładając że przekazywany jest slug)
-        const movieData = await movieService.getMovieDetails(movieId);
+        // Używamy slug z URL parametrów
+        const movieData = await movieService.getMovieDetails(slug);
         setMovie(movieData);
 
         // Sprawdź czy użytkownik ocenił film (tylko jeśli zalogowany)
         const token = localStorage.getItem('token');
         if (token) {
           try {
-            const rating = await movieService.getUserRating(movieId);
+            const rating = await movieService.getUserRating(slug);
             setUserRating(rating.rating || 0);
           } catch {
             // Użytkownik nie ocenił filmu
@@ -28,7 +30,7 @@ const MovieDetail = ({ movieId, onBack }) => {
           }
 
           try {
-            const watchlistStatus = await movieService.checkWatchlistStatus(movieId);
+            const watchlistStatus = await movieService.checkWatchlistStatus(slug);
             setIsInWatchlist(watchlistStatus.in_watchlist);
           } catch {
             setIsInWatchlist(false);
@@ -43,15 +45,15 @@ const MovieDetail = ({ movieId, onBack }) => {
       }
     };
 
-    if (movieId) {
+    if (slug) {
       fetchMovieDetails();
     }
-  }, [movieId]);
+  }, [slug]);
 
   const handleRating = async (rating) => {
     try {
       setUserRating(rating);
-      await movieService.rateMovie(movieId, rating);
+      await movieService.rateMovie(slug, rating);
     } catch (error) {
       console.error('Error rating movie:', error);
       // Można dodać toast notification o błędzie
@@ -62,7 +64,7 @@ const MovieDetail = ({ movieId, onBack }) => {
     try {
       const newStatus = !isInWatchlist;
       setIsInWatchlist(newStatus);
-      await movieService.toggleWatchlist(movieId, newStatus);
+      await movieService.toggleWatchlist(slug, newStatus);
     } catch (error) {
       console.error('Error updating watchlist:', error);
       // Przywróć poprzedni stan w przypadku błędu

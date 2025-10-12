@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = ({ user, onLogout, onLogin }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -71,29 +72,31 @@ const Navbar = ({ user, onLogout, onLogin }) => {
             justifyContent: 'space-between'
           }}>
             {/* Logo */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }} className="mobile-logo">
-              <span style={{
-                fontSize: '2rem',
-                filter: 'drop-shadow(0 0 10px rgba(79, 70, 229, 0.8))'
-              }}>
-                🎬
-              </span>
-              <h1 style={{
-                margin: 0,
-                fontSize: '1.8rem',
-                fontWeight: '700',
-                background: 'linear-gradient(45deg, #e2e8f0, #8b5cf6)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
-              }}>
-                FilmVault
-              </h1>
-            </div>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }} className="mobile-logo">
+                <span style={{
+                  fontSize: '2rem',
+                  filter: 'drop-shadow(0 0 10px rgba(79, 70, 229, 0.8))'
+                }}>
+                  🎬
+                </span>
+                <h1 style={{
+                  margin: 0,
+                  fontSize: '1.8rem',
+                  fontWeight: '700',
+                  background: 'linear-gradient(45deg, #e2e8f0, #8b5cf6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
+                }}>
+                  FilmVault
+                </h1>
+              </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <div style={{

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import Navbar from './components/Navbar';
@@ -7,10 +8,9 @@ import Home from './pages/public/Home';
 import MovieDetail from './pages/public/MovieDetail';
 
 function App() {
-  const [currentView, setCurrentView] = useState('home'); // Domyślnie strona główna
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const navigate = useNavigate();
 
   // Sprawdzenie czy użytkownik jest zalogowany przy starcie
   useEffect(() => {
@@ -36,7 +36,7 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    setCurrentView('home');
+    navigate('/');
   };
 
   const handleLogout = async () => {
@@ -47,26 +47,12 @@ function App() {
       console.log('Logout error:', error);
     } finally {
       setUser(null);
-      setCurrentView('home'); // Zostań na stronie głównej po wylogowaniu
+      navigate('/');
     }
   };
 
-  const switchToRegister = () => {
-    setCurrentView('register');
-  };
-
-  const switchToLogin = () => {
-    setCurrentView('login');
-  };
-
   const handleMovieSelect = (movie) => {
-    setSelectedMovie(movie);
-    setCurrentView('movie-detail');
-  };
-
-  const handleBackToHome = () => {
-    setSelectedMovie(null);
-    setCurrentView('home');
+    navigate(`/movie/${movie.slug}`);
   };
 
   if (isLoading) {
@@ -103,42 +89,26 @@ function App() {
     );
   }
 
-  // Renderowanie strony głównej (dostępne dla wszystkich)
-  if (currentView === 'home') {
-    return (
-      <>
-        <Navbar user={user} onLogout={handleLogout} onLogin={() => setCurrentView('login')} />
-        <Home onMovieSelect={handleMovieSelect} />
-        <Footer />
-      </>
-    );
-  }
-
-  // Renderowanie szczegółów filmu (dostępne dla wszystkich)
-  if (currentView === 'movie-detail' && selectedMovie) {
-    return (
-      <>
-        <Navbar user={user} onLogout={handleLogout} onLogin={() => setCurrentView('login')} />
-        <MovieDetail movieId={selectedMovie.slug} onBack={handleBackToHome} />
-        <Footer />
-      </>
-    );
-  }
-
-  // Renderowanie auth views dla niezalogowanych
   return (
     <>
-      {currentView === 'login' ? (
-        <LoginPage
-          onSwitchToRegister={switchToRegister}
-          onLogin={handleLogin}
-        />
-      ) : (
-        <RegisterPage
-          onSwitchToLogin={switchToLogin}
-          onRegister={handleLogin}
-        />
-      )}
+      <Navbar user={user} onLogout={handleLogout} onLogin={() => navigate('/login')} />
+      <Routes>
+        <Route path="/" element={<Home onMovieSelect={handleMovieSelect} />} />
+        <Route path="/movie/:slug" element={<MovieDetail onBack={() => navigate('/')} />} />
+        <Route path="/login" element={
+          <LoginPage
+            onSwitchToRegister={() => navigate('/register')}
+            onLogin={handleLogin}
+          />
+        } />
+        <Route path="/register" element={
+          <RegisterPage
+            onSwitchToLogin={() => navigate('/login')}
+            onRegister={handleLogin}
+          />
+        } />
+      </Routes>
+      <Footer />
     </>
   );
 }
