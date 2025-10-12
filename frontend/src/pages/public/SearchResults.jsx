@@ -1,15 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import movieService from '../../services/movieService';
+import MovieCard from '../../components/MovieCard';
+import { useMultipleWatchlist } from '../../hooks/useWatchlist';
 
-const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+const SearchResults = ({ user }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [movies, setMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const query = searchParams.get('q') || '';
+  const selectedGenre = searchParams.get('genre') || '';
+  const sortBy = searchParams.get('sort') || 'relevance';
+
+  // Watchlist management
+  const { watchlistStatus, toggleWatchlist } = useMultipleWatchlist(filteredMovies, user);
+
+  // Fetch genres on component mount
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const genresData = await movieService.getGenres();
+        setGenres(genresData);
+      } catch (error) {
+        console.error('Error fetching genres:', error);
+      }
+    };
+    fetchGenres();
+  }, []);
+
+  // Filter and sort movies when dependencies change
+  useEffect(() => {
+    let filtered = [...movies];
+
+    // Filter by genre
+    if (selectedGenre) {
+      filtered = filtered.filter(movie =>
+        movie.genres && movie.genres.some(genre => genre.slug === selectedGenre)
+      );
+    }
+
+    // Sort movies
+    switch (sortBy) {
+      case 'title':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'year':
+        filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => (parseFloat(b.vote_average) || 0) - (parseFloat(a.vote_average) || 0));
+        break;
+      default: // relevance - keep original order
+        break;
+    }
+
+    setFilteredMovies(filtered);
+  }, [movies, selectedGenre, sortBy]);
+
+  const handleGenreChange = (genreSlug) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (genreSlug) {
+      newParams.set('genre', genreSlug);
+    } else {
+      newParams.delete('genre');
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleSortChange = (sortOption) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('sort', sortOption);
+    setSearchParams(newParams);
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -33,112 +100,6 @@ const SearchResults = () => {
 
     fetchResults();
   }, [query, navigate]);
-
-  const handleMovieSelect = (movie) => {
-    navigate(`/movie/${movie.slug}`);
-  };
-
-  const MovieCard = ({ movie }) => (
-    <div
-      style={{
-        background: 'rgba(15, 23, 42, 0.8)',
-        borderRadius: '12px',
-        padding: '0',
-        border: '1px solid rgba(79, 70, 229, 0.2)',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        overflow: 'hidden',
-        height: '320px'
-      }}
-      onClick={() => handleMovieSelect(movie)}
-      onMouseOver={(e) => {
-        e.currentTarget.style.transform = 'translateY(-8px)';
-        e.currentTarget.style.boxShadow = '0 20px 40px rgba(79, 70, 229, 0.4)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
-      <div style={{
-        height: '200px',
-        backgroundImage: movie.poster ? `url(${movie.poster})` : 'none',
-        background: !movie.poster ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '4rem',
-        position: 'relative'
-      }}>
-        {!movie.poster && '🎬'}
-
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          borderRadius: '6px',
-          padding: '4px 8px',
-          color: '#fbbf24',
-          fontSize: '12px',
-          fontWeight: '600'
-        }}>
-          ⭐ {movie.vote_average || 'N/A'}
-        </div>
-      </div>
-
-      <div style={{ padding: '16px' }}>
-        <h6 style={{
-          color: '#e2e8f0',
-          margin: '0 0 8px 0',
-          fontSize: '16px',
-          fontWeight: '600',
-          lineHeight: '1.3'
-        }}>
-          {movie.title}
-        </h6>
-
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px'
-        }}>
-          <span style={{
-            color: '#94a3b8',
-            fontSize: '13px'
-          }}>
-            {movie.year || (movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A')}
-          </span>
-          <div style={{
-            background: 'rgba(79, 70, 229, 0.2)',
-            borderRadius: '6px',
-            padding: '2px 8px',
-            color: '#a78bfa',
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            {movie.genres?.[0]?.name || 'Movie'}
-          </div>
-        </div>
-
-        <p style={{
-          color: '#94a3b8',
-          fontSize: '12px',
-          lineHeight: '1.4',
-          margin: 0,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
-        }}>
-          {movie.overview || 'Brak opisu'}
-        </p>
-      </div>
-    </div>
-  );
 
   if (isLoading) {
     return (
@@ -190,15 +151,84 @@ const SearchResults = () => {
             fontSize: '18px',
             margin: 0
           }}>
-            {error ? error : `Znaleziono ${movies.length} filmów dla "${query}"`}
+            {error ? error : `Znaleziono ${filteredMovies.length} filmów dla "${query}"`}
           </p>
         </div>
 
+        {/* Filters */}
         {!error && movies.length > 0 && (
+          <div style={{
+            background: 'rgba(15, 23, 42, 0.8)',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '30px',
+            border: '1px solid rgba(79, 70, 229, 0.2)'
+          }}>
+            <div className="row align-items-center">
+              <div className="col-md-6 mb-3 mb-md-0">
+                <label style={{ color: '#e2e8f0', marginBottom: '8px', display: 'block', fontSize: '14px', fontWeight: '500' }}>
+                  Filtruj po gatunku:
+                </label>
+                <select
+                  value={selectedGenre}
+                  onChange={(e) => handleGenreChange(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(79, 70, 229, 0.3)',
+                    background: 'rgba(30, 41, 59, 0.8)',
+                    color: '#e2e8f0',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="">Wszystkie gatunki</option>
+                  {genres.map(genre => (
+                    <option key={genre.id} value={genre.slug}>
+                      {genre.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-6">
+                <label style={{ color: '#e2e8f0', marginBottom: '8px', display: 'block', fontSize: '14px', fontWeight: '500' }}>
+                  Sortuj według:
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(79, 70, 229, 0.3)',
+                    background: 'rgba(30, 41, 59, 0.8)',
+                    color: '#e2e8f0',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="relevance">Trafność</option>
+                  <option value="title">Tytuł (A-Z)</option>
+                  <option value="year">Rok (najnowsze)</option>
+                  <option value="rating">Ocena (najwyższa)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!error && filteredMovies.length > 0 && (
           <div className="row">
-            {movies.map(movie => (
+            {filteredMovies.map(movie => (
               <div key={movie.id} className="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
-                <MovieCard movie={movie} />
+                <MovieCard
+                  movie={movie}
+                  onMovieSelect={() => navigate(`/movie/${movie.slug}`)}
+                  showWatchlistButton={!!user}
+                  user={user}
+                  onWatchlistToggle={toggleWatchlist}
+                  isInWatchlist={watchlistStatus[movie.slug] || false}
+                />
               </div>
             ))}
           </div>

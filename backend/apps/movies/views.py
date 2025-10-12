@@ -51,7 +51,7 @@ class MovieListView(generics.ListAPIView):
     serializer_class = MovieListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['genres', 'status', 'year']
+    filterset_fields = ['genres', 'status']
     search_fields = ['title', 'overview', 'og_title']
     ordering_fields = ['vote_average', 'popularity', 'release_date', 'runtime']
     ordering = ['-popularity']

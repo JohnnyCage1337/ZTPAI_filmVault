@@ -5,8 +5,10 @@ import RegisterPage from './components/RegisterPage';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/public/Home';
+import Movies from './pages/public/Movies';
 import MovieDetail from './pages/public/MovieDetail';
 import SearchResults from './pages/public/SearchResults';
+import Watchlist from './pages/auth/Watchlist';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -94,9 +96,11 @@ function App() {
     <>
       <Navbar user={user} onLogout={handleLogout} onLogin={() => navigate('/login')} />
       <Routes>
-        <Route path="/" element={<Home onMovieSelect={handleMovieSelect} />} />
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/movie/:slug" element={<MovieDetail onBack={() => navigate('/')} />} />
+        <Route path="/" element={<Home onMovieSelect={handleMovieSelect} user={user} />} />
+        <Route path="/movies" element={<Movies onMovieSelect={handleMovieSelect} user={user} />} />
+        <Route path="/search" element={<SearchResults user={user} />} />
+        <Route path="/watchlist" element={<Watchlist user={user} />} />
+        <Route path="/movie/:slug" element={<MovieDetail onBack={() => navigate('/')} user={user} />} />
         <Route path="/login" element={
           <LoginPage
             onSwitchToRegister={() => navigate('/register')}

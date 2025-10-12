@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SearchInput = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +68,7 @@ const SearchInput = () => {
 const Navbar = ({ user, onLogout, onLogin }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,8 +99,8 @@ const Navbar = ({ user, onLogout, onLogin }) => {
     const handleClickOutside = (event) => {
       // Close mobile menu when clicking outside, but not on hamburger button or menu itself
       if (isMobileMenuOpen &&
-          !event.target.closest('.mobile-menu-container') &&
-          !event.target.closest('.mobile-menu-button')) {
+        !event.target.closest('.mobile-menu-container') &&
+        !event.target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -118,10 +119,9 @@ const Navbar = ({ user, onLogout, onLogin }) => {
   };
 
   const navigationItems = [
-    { name: 'Home', icon: '🏠' },
-    { name: 'Movies', icon: '🎭' },
-    { name: 'Genres', icon: '🎪' },
-    { name: 'My List', icon: '📝' }
+    { name: 'Home', icon: '🏠', path: '/' },
+    { name: 'Movies', icon: '🎭', path: '/movies' },
+    { name: 'My List', icon: '📝', path: '/watchlist' }
   ];
 
   return (
@@ -193,6 +193,7 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                 {navigationItems.map((item) => (
                   <button
                     key={item.name}
+                    onClick={() => navigate(item.path)}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -400,7 +401,10 @@ const Navbar = ({ user, onLogout, onLogin }) => {
             {navigationItems.map((item) => (
               <button
                 key={item.name}
-                onClick={() => setIsMobileMenuOpen(false)} // Close menu when item clicked
+                onClick={() => {
+                  navigate(item.path);
+                  setIsMobileMenuOpen(false);
+                }}
                 style={{
                   background: 'none',
                   border: 'none',

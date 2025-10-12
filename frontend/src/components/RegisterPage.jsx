@@ -4,10 +4,7 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    first_name: '',
-    last_name: '',
-    password: '',
-    password_confirm: ''
+    password: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,10 +47,7 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
           setFormData({
             username: '',
             email: '',
-            first_name: '',
-            last_name: '',
-            password: '',
-            password_confirm: ''
+            password: ''
           });
           setTimeout(() => {
             onSwitchToLogin();
@@ -169,95 +163,7 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
             </div>
           )}
 
-          {/* Name Fields Row */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '16px',
-            marginBottom: '24px'
-          }}>
-            {/* First Name */}
-            <div>
-              <label style={{
-                display: 'block',
-                color: '#e2e8f0',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '8px'
-              }}>
-                First Name
-              </label>
-              <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="John"
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '2px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '12px',
-                  color: '#e2e8f0',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </div>
 
-            {/* Last Name */}
-            <div>
-              <label style={{
-                display: 'block',
-                color: '#e2e8f0',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '8px'
-              }}>
-                Last Name
-              </label>
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Doe"
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '2px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '12px',
-                  color: '#e2e8f0',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-          </div>
 
           {/* Username Field */}
           <div style={{ marginBottom: '24px' }}>
@@ -342,96 +248,46 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
             />
           </div>
 
-          {/* Password Fields Row */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '16px',
-            marginBottom: '30px'
-          }}>
-            {/* Password */}
-            <div>
-              <label style={{
-                display: 'block',
+          {/* Password Field */}
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{
+              display: 'block',
+              color: '#e2e8f0',
+              fontSize: '14px',
+              fontWeight: '500',
+              marginBottom: '8px'
+            }}>
+              Password *
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              disabled={loading}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 15px',
+                background: 'rgba(30, 41, 59, 0.7)',
+                border: '2px solid rgba(79, 70, 229, 0.3)',
+                borderRadius: '12px',
                 color: '#e2e8f0',
                 fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '8px'
-              }}>
-                Password *
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                disabled={loading}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '2px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '12px',
-                  color: '#e2e8f0',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label style={{
-                display: 'block',
-                color: '#e2e8f0',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '8px'
-              }}>
-                Confirm *
-              </label>
-              <input
-                type="password"
-                name="password_confirm"
-                value={formData.password_confirm}
-                onChange={handleChange}
-                placeholder="Confirm"
-                disabled={loading}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '2px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '12px',
-                  color: '#e2e8f0',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </div>
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4f46e5';
+                e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
           </div>
 
           {/* Register Button */}

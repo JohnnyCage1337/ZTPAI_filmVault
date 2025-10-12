@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import movieService from '../../services/movieService';
 
-const MovieDetail = ({ onBack }) => {
+const MovieDetail = ({ onBack, user }) => {
   const { slug } = useParams();
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,7 +88,7 @@ const MovieDetail = ({ onBack }) => {
             onMouseOver={(e) => !readonly && (e.target.style.color = '#fbbf24')}
             onMouseOut={(e) => !readonly && star > rating && (e.target.style.color = '#374151')}
           >
-            ⭐
+            {star <= rating ? '★' : '☆'}
           </span>
         ))}
       </div>
@@ -296,40 +296,28 @@ const MovieDetail = ({ onBack }) => {
               </p>
 
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <button style={{
-                  background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '16px 32px',
-                  color: 'white',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  ▶️ Watch Now
-                </button>
+                {/* Watch Now button hidden */}
 
-                <button
-                  onClick={toggleWatchlist}
-                  style={{
-                    background: isInWatchlist ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                    border: `1px solid ${isInWatchlist ? '#22c55e' : 'rgba(255, 255, 255, 0.3)'}`,
-                    borderRadius: '12px',
-                    padding: '16px 32px',
-                    color: isInWatchlist ? '#22c55e' : '#e2e8f0',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  {isInWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
-                </button>
+                {user && (
+                  <button
+                    onClick={toggleWatchlist}
+                    style={{
+                      background: isInWatchlist ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                      border: `1px solid ${isInWatchlist ? '#22c55e' : 'rgba(255, 255, 255, 0.3)'}`,
+                      borderRadius: '12px',
+                      padding: '16px 32px',
+                      color: isInWatchlist ? '#22c55e' : '#e2e8f0',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {isInWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

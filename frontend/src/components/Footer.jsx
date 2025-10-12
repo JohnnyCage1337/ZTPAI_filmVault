@@ -9,14 +9,15 @@ const Footer = () => {
       borderTop: '1px solid rgba(79, 70, 229, 0.1)'
     }}>
       <div className="container">
-        <div className="row">
+        <div className="row justify-content-center">
           {/* Logo & Description */}
-          <div className="col-md-4 mb-4">
+          <div className="col-md-6 text-center mb-4">
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              marginBottom: '20px'
+              marginBottom: '20px',
+              justifyContent: 'center'
             }}>
               <span style={{
                 fontSize: '2rem',
@@ -48,7 +49,8 @@ const Footer = () => {
             {/* Social Media */}
             <div style={{
               display: 'flex',
-              gap: '12px'
+              gap: '12px',
+              justifyContent: 'center'
             }}>
               {[
                 { icon: '📘', name: 'Facebook' },
@@ -85,167 +87,6 @@ const Footer = () => {
                   {social.icon}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="col-md-2 mb-4">
-            <h5 style={{
-              color: '#e2e8f0',
-              fontSize: '16px',
-              fontWeight: '600',
-              marginBottom: '20px'
-            }}>
-              Discover
-            </h5>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              {['Popular Movies', 'Top Rated', 'New Releases', 'Coming Soon', 'Trending'].map((link) => (
-                <button
-                  key={link}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    padding: '4px 0',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#c7d2fe'}
-                  onMouseOut={(e) => e.target.style.color = '#94a3b8'}
-                >
-                  {link}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Genres */}
-          <div className="col-md-2 mb-4">
-            <h5 style={{
-              color: '#e2e8f0',
-              fontSize: '16px',
-              fontWeight: '600',
-              marginBottom: '20px'
-            }}>
-              Genres
-            </h5>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              {['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi'].map((genre) => (
-                <button
-                  key={genre}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    padding: '4px 0',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#c7d2fe'}
-                  onMouseOut={(e) => e.target.style.color = '#94a3b8'}
-                >
-                  {genre}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Support */}
-          <div className="col-md-2 mb-4">
-            <h5 style={{
-              color: '#e2e8f0',
-              fontSize: '16px',
-              fontWeight: '600',
-              marginBottom: '20px'
-            }}>
-              Support
-            </h5>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              {['Help Center', 'Contact Us', 'Privacy Policy', 'Terms of Service', 'API'].map((link) => (
-                <button
-                  key={link}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    padding: '4px 0',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#c7d2fe'}
-                  onMouseOut={(e) => e.target.style.color = '#94a3b8'}
-                >
-                  {link}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Newsletter */}
-          <div className="col-md-2 mb-4">
-            <h5 style={{
-              color: '#e2e8f0',
-              fontSize: '16px',
-              fontWeight: '600',
-              marginBottom: '20px'
-            }}>
-              Stay Updated
-            </h5>
-            <p style={{
-              color: '#94a3b8',
-              fontSize: '13px',
-              marginBottom: '15px'
-            }}>
-              Get notified about new movies and features
-            </p>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                style={{
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '1px solid rgba(79, 70, 229, 0.3)',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  color: '#e2e8f0',
-                  fontSize: '12px',
-                  outline: 'none'
-                }}
-              />
-              <button style={{
-                background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                color: 'white',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}>
-                Subscribe
-              </button>
             </div>
           </div>
         </div>

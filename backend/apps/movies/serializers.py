@@ -20,10 +20,13 @@ class MovieCastSerializer(serializers.ModelSerializer):
 
 class MovieListSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True, read_only=True)
-    year = serializers.ReadOnlyField()
+    year = serializers.SerializerMethodField()
     average_rating = serializers.ReadOnlyField()
     rating_count = serializers.ReadOnlyField()
     poster = serializers.SerializerMethodField()
+
+    def get_year(self, obj):
+        return obj.year
 
     def get_poster(self, obj):
         if obj.poster:
@@ -46,12 +49,18 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     director = PersonSerializer(read_only=True)
     writers = PersonSerializer(many=True, read_only=True)
     cast = MovieCastSerializer(many=True, read_only=True)
-    year = serializers.ReadOnlyField()
-    profit = serializers.ReadOnlyField()
+    year = serializers.SerializerMethodField()
+    profit = serializers.SerializerMethodField()
     average_rating = serializers.ReadOnlyField()
     rating_count = serializers.ReadOnlyField()
     poster = serializers.SerializerMethodField()
     background = serializers.SerializerMethodField()
+
+    def get_year(self, obj):
+        return obj.year
+
+    def get_profit(self, obj):
+        return obj.profit
 
     def get_poster(self, obj):
         if obj.poster:
