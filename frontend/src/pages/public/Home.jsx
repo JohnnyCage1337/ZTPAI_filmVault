@@ -589,22 +589,6 @@ const Home = ({ onMovieSelect }) => {
           <div className="row">
             {trendingMovies.map((movie) => (
               <div key={movie.id} className="col-md-4 col-lg-2 mb-4">
-                <MovieCard movie={movie} type="movie" />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Trending Series */}
-        {/* Trending Movies */}
-        <section style={{ marginBottom: '80px' }}>
-          <SectionTitle
-            title="� Trending Now"
-            subtitle="Most popular movies right now"
-          />
-          <div className="row">
-            {trendingMovies.map((movie) => (
-              <div key={movie.id} className="col-md-4 col-lg-2 mb-4">
                 <MovieCard movie={movie} type="movie" onMovieSelect={onMovieSelect} />
               </div>
             ))}
