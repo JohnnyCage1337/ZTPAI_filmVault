@@ -7,7 +7,7 @@ import Home from './pages/public/Home';
 import MovieDetail from './pages/public/MovieDetail';
 
 function App() {
-  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'home', 'movie-detail'
+  const [currentView, setCurrentView] = useState('home'); // Domyślnie strona główna
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -19,17 +19,16 @@ function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/check/', {
-        credentials: 'include'
-      });
-      const data = await response.json();
-
-      if (data.authenticated) {
-        setUser(data.user);
-        setCurrentView('home');
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Możesz tutaj sprawdzić czy token jest ważny
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          setUser(JSON.parse(userData));
+        }
       }
-    } catch {
-      console.log('Not authenticated');
+    } catch (error) {
+      console.log('Auth check error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -42,15 +41,13 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8000/api/auth/logout/', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     } catch (error) {
       console.log('Logout error:', error);
     } finally {
       setUser(null);
-      setCurrentView('login');
+      setCurrentView('home'); // Zostań na stronie głównej po wylogowaniu
     }
   };
 
@@ -106,23 +103,23 @@ function App() {
     );
   }
 
-  // Renderowanie strony głównej dla zalogowanych użytkowników
-  if (currentView === 'home' && user) {
+  // Renderowanie strony głównej (dostępne dla wszystkich)
+  if (currentView === 'home') {
     return (
       <>
-        <Navbar user={user} onLogout={handleLogout} />
+        <Navbar user={user} onLogout={handleLogout} onLogin={() => setCurrentView('login')} />
         <Home onMovieSelect={handleMovieSelect} />
         <Footer />
       </>
     );
   }
 
-  // Renderowanie szczegółów filmu
-  if (currentView === 'movie-detail' && user && selectedMovie) {
+  // Renderowanie szczegółów filmu (dostępne dla wszystkich)
+  if (currentView === 'movie-detail' && selectedMovie) {
     return (
       <>
-        <Navbar user={user} onLogout={handleLogout} />
-        <MovieDetail movieId={selectedMovie.id} onBack={handleBackToHome} />
+        <Navbar user={user} onLogout={handleLogout} onLogin={() => setCurrentView('login')} />
+        <MovieDetail movieId={selectedMovie.slug} onBack={handleBackToHome} />
         <Footer />
       </>
     );

@@ -1,82 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-// Mock movie data - poza komponentem żeby uniknąć problemów z React Hook dependencies
-const MOCK_MOVIE_DETAILS = {
-  1: {
-    id: 1,
-    title: "The Batman",
-    originalTitle: "The Batman",
-    description: "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption and question his family's involvement.",
-    fullDescription: "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler. As the evidence begins to lead closer to home and the scale of the perpetrator's plans become clear, Batman must forge new relationships, unmask the culprit, and bring justice to the abuse of power and corruption that has long plagued Gotham City.",
-    poster: "🦇",
-    backdrop: "linear-gradient(135deg, #1a0b2e 0%, #2d1b42 50%, #4a3b5c 100%)",
-    rating: 8.2,
-    year: 2022,
-    runtime: 176,
-    genre: ["Action", "Crime", "Drama"],
-    director: "Matt Reeves",
-    writers: ["Matt Reeves", "Peter Craig"],
-    cast: [
-      { name: "Robert Pattinson", character: "Bruce Wayne / Batman", photo: "🦇" },
-      { name: "Zoë Kravitz", character: "Selina Kyle / Catwoman", photo: "🐱" },
-      { name: "Paul Dano", character: "Edward Nashton / The Riddler", photo: "❓" },
-      { name: "Jeffrey Wright", character: "James Gordon", photo: "👮" },
-      { name: "John Turturro", character: "Carmine Falcone", photo: "👔" },
-      { name: "Andy Serkis", character: "Alfred Pennyworth", photo: "🎩" }
-    ],
-    budget: "$185,000,000",
-    boxOffice: "$771,000,000",
-    language: "English",
-    country: "USA",
-    productionCompanies: ["Warner Bros.", "DC Films"],
-    awards: ["Saturn Award Winner", "Critics Choice Nominee"],
-    trivia: [
-      "Robert Pattinson performed many of his own stunts",
-      "The Batmobile was built as a fully functional car",
-      "Filmed in Chicago and Liverpool doubling for Gotham",
-      "Michael Giacchino composed a noir-influenced score"
-    ],
-    relatedMovies: [
-      { id: 2, title: "Batman Begins", poster: "🦇", rating: 8.2 },
-      { id: 3, title: "The Dark Knight", poster: "🃏", rating: 9.0 },
-      { id: 4, title: "Joker", poster: "🤡", rating: 8.4 }
-    ]
-  },
-  2: {
-    id: 2,
-    title: "Top Gun: Maverick",
-    originalTitle: "Top Gun: Maverick",
-    description: "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission that demands the ultimate sacrifice from those chosen to fly it.",
-    poster: "✈️",
-    backdrop: "linear-gradient(135deg, #0369a1 0%, #0284c7 50%, #0ea5e9 100%)",
-    rating: 8.8,
-    year: 2022,
-    runtime: 131,
-    genre: ["Action", "Drama"],
-    director: "Joseph Kosinski",
-    cast: [
-      { name: "Tom Cruise", character: "Pete 'Maverick' Mitchell", photo: "✈️" },
-      { name: "Miles Teller", character: "Bradley 'Rooster' Bradshaw", photo: "🐓" }
-    ]
-  },
-  3: {
-    id: 3,
-    title: "Everything Everywhere All at Once",
-    originalTitle: "Everything Everywhere All at Once",
-    description: "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have lived.",
-    poster: "🌀",
-    backdrop: "linear-gradient(135deg, #ec4899 0%, #f97316 50%, #facc15 100%)",
-    rating: 8.9,
-    year: 2022,
-    runtime: 139,
-    genre: ["Action", "Adventure", "Comedy"],
-    director: "Daniels",
-    cast: [
-      { name: "Michelle Yeoh", character: "Evelyn Quan Wang", photo: "👸" },
-      { name: "Stephanie Hsu", character: "Joy Wang / Jobu Tupaki", photo: "🌟" }
-    ]
-  }
-};
+import movieService from '../../services/movieService';
 
 const MovieDetail = ({ movieId, onBack }) => {
   const [movie, setMovie] = useState(null);
@@ -85,27 +8,66 @@ const MovieDetail = ({ movieId, onBack }) => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   useEffect(() => {
-    // Symulacja ładowania danych filmu
-    setIsLoading(true);
-    setTimeout(() => {
-      const movieData = MOCK_MOVIE_DETAILS[movieId];
-      setMovie(movieData || null);
-      setIsLoading(false);
-    }, 1000);
+    const fetchMovieDetails = async () => {
+      try {
+        setIsLoading(true);
 
-    // Symulacja sprawdzenia czy film jest w watchlist
-    setIsInWatchlist(Math.random() > 0.5);
-    setUserRating(Math.floor(Math.random() * 10) + 1);
+        // Używamy movieId jako slug (zakładając że przekazywany jest slug)
+        const movieData = await movieService.getMovieDetails(movieId);
+        setMovie(movieData);
+
+        // Sprawdź czy użytkownik ocenił film (tylko jeśli zalogowany)
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const rating = await movieService.getUserRating(movieId);
+            setUserRating(rating.rating || 0);
+          } catch {
+            // Użytkownik nie ocenił filmu
+            setUserRating(0);
+          }
+
+          try {
+            const watchlistStatus = await movieService.checkWatchlistStatus(movieId);
+            setIsInWatchlist(watchlistStatus.in_watchlist);
+          } catch {
+            setIsInWatchlist(false);
+          }
+        }
+
+      } catch (error) {
+        console.error('Error fetching movie details:', error);
+        setMovie(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (movieId) {
+      fetchMovieDetails();
+    }
   }, [movieId]);
 
-  const handleRating = (rating) => {
-    setUserRating(rating);
-    // Tutaj dodać API call do zapisania oceny
+  const handleRating = async (rating) => {
+    try {
+      setUserRating(rating);
+      await movieService.rateMovie(movieId, rating);
+    } catch (error) {
+      console.error('Error rating movie:', error);
+      // Można dodać toast notification o błędzie
+    }
   };
 
-  const toggleWatchlist = () => {
-    setIsInWatchlist(!isInWatchlist);
-    // Tutaj dodać API call do dodania/usunięcia z watchlist
+  const toggleWatchlist = async () => {
+    try {
+      const newStatus = !isInWatchlist;
+      setIsInWatchlist(newStatus);
+      await movieService.toggleWatchlist(movieId, newStatus);
+    } catch (error) {
+      console.error('Error updating watchlist:', error);
+      // Przywróć poprzedni stan w przypadku błędu
+      setIsInWatchlist(!isInWatchlist);
+    }
   };
 
   const StarRating = ({ rating, onRate, readonly = false }) => {
@@ -229,7 +191,9 @@ const MovieDetail = ({ movieId, onBack }) => {
 
       {/* Hero Section */}
       <div style={{
-        background: movie.backdrop,
+        background: movie.background ?
+          `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url(${movie.background})` :
+          'linear-gradient(135deg, #1a0b2e 0%, #2d1b42 50%, #4a3b5c 100%)',
         minHeight: '500px',
         position: 'relative',
         display: 'flex',
@@ -246,7 +210,31 @@ const MovieDetail = ({ movieId, onBack }) => {
                 fontSize: '6rem',
                 border: '3px solid rgba(255, 255, 255, 0.2)'
               }}>
-                {movie.poster}
+                {movie.poster ? (
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '15px'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#374151',
+                    borderRadius: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '60px'
+                  }}>
+                    🎬
+                  </div>
+                )}
               </div>
             </div>
             <div className="col-md-8">
@@ -256,8 +244,8 @@ const MovieDetail = ({ movieId, onBack }) => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <StarRating rating={Math.floor(movie.rating)} readonly={true} />
-                  <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{movie.rating}/10</span>
+                  <StarRating rating={Math.floor(movie.vote_average)} readonly={true} />
+                  <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{movie.vote_average}/10</span>
                 </div>
                 <span style={{
                   background: 'rgba(79, 70, 229, 0.3)',
@@ -278,7 +266,7 @@ const MovieDetail = ({ movieId, onBack }) => {
               </div>
 
               <div style={{ marginBottom: '20px' }}>
-                {movie.genre.map((g, index) => (
+                {movie.genres && movie.genres.map((g, index) => (
                   <span
                     key={index}
                     style={{
@@ -291,7 +279,7 @@ const MovieDetail = ({ movieId, onBack }) => {
                       marginBottom: '8px'
                     }}
                   >
-                    {g}
+                    {g.name}
                   </span>
                 ))}
               </div>
@@ -302,7 +290,7 @@ const MovieDetail = ({ movieId, onBack }) => {
                 color: '#e2e8f0',
                 marginBottom: '30px'
               }}>
-                {movie.fullDescription || movie.description}
+                {movie.overview}
               </p>
 
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -384,12 +372,12 @@ const MovieDetail = ({ movieId, onBack }) => {
               <div style={{ display: 'grid', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(79, 70, 229, 0.1)', paddingBottom: '8px' }}>
                   <span style={{ color: '#94a3b8' }}>Director:</span>
-                  <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.director}</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.director?.name || 'N/A'}</span>
                 </div>
-                {movie.writers && (
+                {movie.writers && movie.writers.length > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(79, 70, 229, 0.1)', paddingBottom: '8px' }}>
                     <span style={{ color: '#94a3b8' }}>Writers:</span>
-                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.writers.join(', ')}</span>
+                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.writers.map(w => w.name).join(', ')}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(79, 70, 229, 0.1)', paddingBottom: '8px' }}>
@@ -411,13 +399,13 @@ const MovieDetail = ({ movieId, onBack }) => {
                 {movie.budget && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(79, 70, 229, 0.1)', paddingBottom: '8px' }}>
                     <span style={{ color: '#94a3b8' }}>Budget:</span>
-                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.budget}</span>
+                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>${movie.budget?.toLocaleString() || 'N/A'}</span>
                   </div>
                 )}
-                {movie.boxOffice && (
+                {movie.revenue && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#94a3b8' }}>Box Office:</span>
-                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>{movie.boxOffice}</span>
+                    <span style={{ color: '#e2e8f0', fontWeight: '500' }}>${movie.revenue.toLocaleString()}</span>
                   </div>
                 )}
               </div>
@@ -504,13 +492,38 @@ const MovieDetail = ({ movieId, onBack }) => {
                       fontSize: '3rem',
                       marginBottom: '12px'
                     }}>
-                      {person.photo}
+                      {person.person?.avatar ? (
+                        <img
+                          src={person.person.avatar}
+                          alt={person.person.name}
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            objectFit: 'cover',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '60px',
+                          height: '60px',
+                          backgroundColor: '#4f46e5',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.5rem',
+                          color: 'white'
+                        }}>
+                          {person.person?.name ? person.person.name.charAt(0) : '👤'}
+                        </div>
+                      )}
                     </div>
                     <h5 style={{ color: '#e2e8f0', marginBottom: '8px', fontSize: '1.1rem' }}>
-                      {person.name}
+                      {person.person?.name}
                     </h5>
                     <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                      {person.character}
+                      {person.character_name}
                     </p>
                   </div>
                 </div>

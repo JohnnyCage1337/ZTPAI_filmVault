@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user, onLogout, onLogin }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -18,8 +18,8 @@ const Navbar = ({ user, onLogout }) => {
 
     const handleClickOutside = (event) => {
       // Close mobile menu when clicking outside, but not on hamburger button or menu itself
-      if (isMobileMenuOpen && 
-          !event.target.closest('.mobile-menu-container') && 
+      if (isMobileMenuOpen &&
+          !event.target.closest('.mobile-menu-container') &&
           !event.target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
@@ -232,16 +232,18 @@ const Navbar = ({ user, onLogout }) => {
                     </button>
                   </div>
                 ) : (
-                  <button style={{
-                    background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}>
+                  <button
+                    onClick={onLogin}
+                    style={{
+                      background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}>
                     Sign In
                   </button>
                 )}
@@ -498,17 +500,19 @@ const Navbar = ({ user, onLogout }) => {
               </button>
             </div>
           ) : (
-            <button style={{
-              background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '16px 24px',
-              color: 'white',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              marginTop: 'auto'
-            }}>
+            <button
+              onClick={onLogin}
+              style={{
+                background: 'linear-gradient(45deg, #4f46e5, #7c3aed)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '16px 24px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                marginTop: 'auto'
+              }}>
               Sign In
             </button>
           )}
