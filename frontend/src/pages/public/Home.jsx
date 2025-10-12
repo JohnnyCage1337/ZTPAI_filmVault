@@ -1,80 +1,84 @@
 import React, { useState, useEffect } from 'react';
+import movieService from '../../services/movieService';
 
 const Home = ({ onMovieSelect }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Sample movie data
-  const heroMovies = [
-    {
-      id: 1,
-      title: "Dune: Part Two",
-      description: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-      backdrop: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-      rating: 8.5,
-      year: 2024,
-      genre: "Sci-Fi"
-    },
-    {
-      id: 2,
-      title: "Oppenheimer",
-      description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
-      backdrop: "linear-gradient(135deg, #2c1810 0%, #5d4037 50%, #8d6e63 100%)",
-      rating: 8.7,
-      year: 2023,
-      genre: "Biography"
-    },
-    {
-      id: 3,
-      title: "Spider-Man: Into the Spider-Verse",
-      description: "Teen Miles Morales becomes Spider-Man and must save the multiverse from collapsing.",
-      backdrop: "linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #42a5f5 100%)",
-      rating: 8.4,
-      year: 2023,
-      genre: "Animation"
-    }
-  ];
-
-  const trendingMovies = [
-    { id: 1, title: "The Batman", poster: "🦇", rating: 8.2, year: 2024 },
-    { id: 2, title: "Top Gun: Maverick", poster: "✈️", rating: 8.8, year: 2024 },
-    { id: 3, title: "Everything Everywhere", poster: "🌀", rating: 8.9, year: 2024 },
-    { id: 4, title: "Avatar: The Way of Water", poster: "🌊", rating: 8.1, year: 2024 },
-    { id: 5, title: "Black Panther", poster: "🐾", rating: 8.5, year: 2024 },
-    { id: 6, title: "Doctor Strange", poster: "🔮", rating: 8.3, year: 2024 }
-  ];
-
-  const trendingSeries = [
-    { id: 1, title: "House of the Dragon", poster: "🐉", rating: 8.7, seasons: 2 },
-    { id: 2, title: "The Bear", poster: "👨‍🍳", rating: 9.1, seasons: 3 },
-    { id: 3, title: "Wednesday", poster: "🕷️", rating: 8.3, seasons: 1 },
-    { id: 4, title: "Stranger Things", poster: "👾", rating: 8.8, seasons: 4 },
-    { id: 5, title: "The Crown", poster: "👑", rating: 8.9, seasons: 6 },
-    { id: 6, title: "Better Call Saul", poster: "⚖️", rating: 9.2, seasons: 6 }
-  ];
-
-  const topRated = [
-    { id: 1, title: "The Godfather", poster: "🍷", rating: 9.2, year: 1972 },
-    { id: 2, title: "The Shawshank Redemption", poster: "🔒", rating: 9.3, year: 1994 },
-    { id: 3, title: "Schindler's List", poster: "📜", rating: 9.0, year: 1993 },
-    { id: 4, title: "The Dark Knight", poster: "🃏", rating: 9.0, year: 2008 },
-    { id: 5, title: "Pulp Fiction", poster: "💼", rating: 8.9, year: 1994 },
-    { id: 6, title: "Forrest Gump", poster: "🏃‍♂️", rating: 8.8, year: 1994 }
-  ];
+  const [heroMovies, setHeroMovies] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [topRatedMovies, setTopRatedMovies] = useState([]);
+  const [popularMovies, setPopularMovies] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    // Initialize data loading
-    setTimeout(() => setIsLoading(false), 1500);
+    const fetchMovies = async () => {
+      try {
+        setIsLoading(true);
 
-    // Auto-slide dla hero carousel
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroMovies.length);
-    }, 6000);
+        // Fetch all home data in one request
+        const homeData = await movieService.getHomeData();
 
-    return () => clearInterval(interval);
-  }, [heroMovies.length]); // Dodano heroMovies.length jako dependency
+        setTrendingMovies(homeData.trending.slice(0, 6));
+        setTopRatedMovies(homeData.top_rated.slice(0, 6));
+        setPopularMovies(homeData.popular.slice(0, 6));
 
-  const MovieCard = ({ movie, type = 'movie' }) => (
+        // Use hero_movies from backend or fallback to trending
+        setHeroMovies(homeData.hero_movies || homeData.trending.slice(0, 3));
+
+      } catch (error) {
+        console.error('Error fetching movies:', error);
+        // Fallback to empty arrays on error
+        setTrendingMovies([]);
+        setTopRatedMovies([]);
+        setPopularMovies([]);
+        setHeroMovies([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMovies();
+  }, []);
+
+  // Auto-slide dla hero carousel
+  useEffect(() => {
+    if (heroMovies.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroMovies.length);
+      }, 6000);
+
+      return () => clearInterval(interval);
+    }
+  }, [heroMovies]);
+
+  // Handle search
+  const handleSearch = async (query) => {
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const results = await movieService.searchMovies(query);
+      setSearchResults(results.results || []);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const MovieCard = ({ movie, type = 'movie', onMovieSelect }) => (
     <div
       style={{
         background: 'rgba(15, 23, 42, 0.8)',
@@ -99,14 +103,17 @@ const Home = ({ onMovieSelect }) => {
       {/* Poster */}
       <div style={{
         height: '200px',
-        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+        backgroundImage: movie.poster ? `url(${movie.poster})` : 'none',
+        background: !movie.poster ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '4rem',
         position: 'relative'
       }}>
-        {movie.poster}
+        {!movie.poster && '🎬'}
 
         {/* Play Button Overlay */}
         <div style={{
@@ -140,7 +147,7 @@ const Home = ({ onMovieSelect }) => {
           fontSize: '12px',
           fontWeight: '600'
         }}>
-          ⭐ {movie.rating}
+          ⭐ {movie.vote_average || movie.rating || 'N/A'}
         </div>
       </div>
 
@@ -166,7 +173,7 @@ const Home = ({ onMovieSelect }) => {
             color: '#94a3b8',
             fontSize: '13px'
           }}>
-            {type === 'series' ? `${movie.seasons} Seasons` : movie.year}
+            {movie.year || (movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A')}
           </span>
           <div style={{
             background: 'rgba(79, 70, 229, 0.2)',
@@ -284,7 +291,142 @@ const Home = ({ onMovieSelect }) => {
       minHeight: '100vh',
       paddingTop: '80px'
     }}>
-      {/* Hero Carousel */}
+      {/* Search Bar */}
+      <section style={{ padding: '40px 0 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="container">
+          <div style={{
+            background: 'rgba(15, 23, 42, 0.8)',
+            borderRadius: '16px',
+            padding: '32px',
+            border: '1px solid rgba(79, 70, 229, 0.2)',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              color: '#e2e8f0',
+              fontSize: '2rem',
+              fontWeight: '700',
+              marginBottom: '24px',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }}>
+              🎬 Znajdź swój film
+            </h2>
+            
+            <div style={{ position: 'relative', maxWidth: '600px', margin: '0 auto' }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleSearch(e.target.value);
+                }}
+                placeholder="Wyszukaj filmy..."
+                style={{
+                  width: '100%',
+                  padding: '16px 50px 16px 20px',
+                  borderRadius: '12px',
+                  border: '2px solid rgba(79, 70, 229, 0.3)',
+                  background: 'rgba(15, 23, 42, 0.9)',
+                  color: '#e2e8f0',
+                  fontSize: '16px',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#4f46e5';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+              
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(79, 70, 229, 0.2)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    color: '#e2e8f0',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+              
+              {isSearching && (
+                <div style={{
+                  position: 'absolute',
+                  right: searchQuery ? '60px' : '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#4f46e5'
+                }}>
+                  ⏳
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Search Results */}
+      {searchQuery && searchResults.length > 0 && (
+        <section style={{ padding: '0 0 40px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="container">
+            <h3 style={{
+              color: '#e2e8f0',
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              marginBottom: '24px',
+              textAlign: 'center'
+            }}>
+              Wyniki wyszukiwania ({searchResults.length})
+            </h3>
+            
+            <div className="row">
+              {searchResults.map(movie => (
+                <div key={movie.id} className="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                  <MovieCard 
+                    movie={movie} 
+                    onMovieSelect={onMovieSelect} 
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Show message when search has no results */}
+      {searchQuery && searchResults.length === 0 && !isSearching && (
+        <section style={{ padding: '0 0 40px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="container">
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.8)',
+              borderRadius: '12px',
+              padding: '40px',
+              textAlign: 'center',
+              border: '1px solid rgba(79, 70, 229, 0.2)'
+            }}>
+              <p style={{ color: '#94a3b8', fontSize: '18px', margin: 0 }}>
+                Nie znaleziono filmów dla "{searchQuery}"
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Hero Carousel - only show when not searching */}
+      {!searchQuery && (
       <section style={{
         height: '70vh',
         position: 'relative',
@@ -300,7 +442,11 @@ const Home = ({ onMovieSelect }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: movie.backdrop,
+              background: movie.background ?
+                `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${movie.background})` :
+                'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
               opacity: index === currentSlide ? 1 : 0,
               transition: 'opacity 1s ease-in-out',
               display: 'flex',
@@ -322,7 +468,7 @@ const Home = ({ onMovieSelect }) => {
                       fontSize: '12px',
                       fontWeight: '600'
                     }}>
-                      {movie.genre} • {movie.year} • ⭐ {movie.rating}
+                      {movie.genres?.[0]?.name || 'Movie'} • {movie.year || (movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A')} • ⭐ {movie.vote_average || 'N/A'}
                     </span>
                   </div>
 
@@ -343,7 +489,7 @@ const Home = ({ onMovieSelect }) => {
                     marginBottom: '30px',
                     maxWidth: '500px'
                   }}>
-                    {movie.description}
+                    {movie.overview || 'No description available.'}
                   </p>
 
                   <div style={{
@@ -429,7 +575,10 @@ const Home = ({ onMovieSelect }) => {
           ))}
         </div>
       </section>
+      )}
 
+      {/* Main sections - only show when not searching */}
+      {!searchQuery && (
       <div className="container">
         {/* Trending Movies */}
         <section style={{ marginBottom: '80px' }}>
@@ -447,15 +596,16 @@ const Home = ({ onMovieSelect }) => {
         </section>
 
         {/* Trending Series */}
+        {/* Trending Movies */}
         <section style={{ marginBottom: '80px' }}>
           <SectionTitle
-            title="📺 Trending Series"
-            subtitle="Binge-worthy shows you can't miss"
+            title="� Trending Now"
+            subtitle="Most popular movies right now"
           />
           <div className="row">
-            {trendingSeries.map((series) => (
-              <div key={series.id} className="col-md-4 col-lg-2 mb-4">
-                <MovieCard movie={series} type="series" />
+            {trendingMovies.map((movie) => (
+              <div key={movie.id} className="col-md-4 col-lg-2 mb-4">
+                <MovieCard movie={movie} type="movie" onMovieSelect={onMovieSelect} />
               </div>
             ))}
           </div>
@@ -468,14 +618,30 @@ const Home = ({ onMovieSelect }) => {
             subtitle="The greatest films ever made"
           />
           <div className="row">
-            {topRated.map((movie) => (
+            {topRatedMovies.map((movie) => (
               <div key={movie.id} className="col-md-4 col-lg-2 mb-4">
-                <MovieCard movie={movie} type="movie" />
+                <MovieCard movie={movie} type="movie" onMovieSelect={onMovieSelect} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Popular Movies */}
+        <section style={{ marginBottom: '80px' }}>
+          <SectionTitle
+            title="🌟 Popular Movies"
+            subtitle="Most watched movies"
+          />
+          <div className="row">
+            {popularMovies.map((movie) => (
+              <div key={movie.id} className="col-md-4 col-lg-2 mb-4">
+                <MovieCard movie={movie} type="movie" onMovieSelect={onMovieSelect} />
               </div>
             ))}
           </div>
         </section>
       </div>
+      )}
     </div>
   );
 };
