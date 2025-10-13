@@ -9,6 +9,8 @@ import Movies from './pages/public/Movies';
 import MovieDetail from './pages/public/MovieDetail';
 import SearchResults from './pages/public/SearchResults';
 import Watchlist from './pages/auth/Watchlist';
+import { authService } from './services/authService';
+import { sessionManager } from './utils/sessionManager';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -17,25 +19,29 @@ function App() {
 
   // Sprawdzenie czy użytkownik jest zalogowany przy starcie
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        // Możesz tutaj sprawdzić czy token jest ważny
-        const userData = localStorage.getItem('user');
+    const checkAuthStatus = async () => {
+      try {
+        const userData = await authService.checkAuth();
         if (userData) {
-          setUser(JSON.parse(userData));
+          setUser(userData);
         }
+      } catch (error) {
+        console.log('User not authenticated:', error.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.log('Auth check error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    checkAuthStatus();
+    
+    // Initialize session manager for automatic token refresh and expiry handling
+    sessionManager.init();
+
+    // Cleanup on unmount
+    return () => {
+      sessionManager.cleanup();
+    };
+  }, []);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -44,8 +50,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      await authService.logout();
     } catch (error) {
       console.log('Logout error:', error);
     } finally {

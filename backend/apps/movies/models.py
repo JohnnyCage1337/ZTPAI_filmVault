@@ -46,45 +46,37 @@ class Movie(models.Model):
         ('upcoming', 'Upcoming'),
     ]
 
-    # Basic info
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     og_title = models.CharField(max_length=255, blank=True, help_text="Original title")
     overview = models.TextField(blank=True)
 
-    # Dates and duration
     release_date = models.DateField(null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)],
                                   help_text='Runtime in minutes')
 
-    # Financial
     budget = models.BigIntegerField(null=True, blank=True)
     revenue = models.BigIntegerField(null=True, blank=True)
 
-    # Media
     poster = models.ImageField(upload_to='posters/', null=True, blank=True, help_text="Poster image (smaller)")
     background = models.ImageField(upload_to='backgrounds/', null=True, blank=True, help_text="Background image (larger)")
     trailer_url = models.URLField(blank=True)
 
-    # Metadata
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='released')
     adult = models.BooleanField(default=False)
     imdb_id = models.CharField(max_length=20, blank=True)
     language = models.CharField(max_length=10, default='en')
     country = models.CharField(max_length=100, default='USA')
 
-    # Ratings
     vote_average = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     vote_count = models.IntegerField(default=0)
     popularity = models.IntegerField(default=0)
 
-    # Relationships
     genres = models.ManyToManyField(Genre, blank=True, related_name='movies')
     director = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='directed_movies')
     writers = models.ManyToManyField(Person, blank=True, related_name='written_movies')
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

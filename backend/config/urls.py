@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 def api_test(request):
     return JsonResponse({'message': 'FILMVAULT API działa!', 'status': 'OK'})
@@ -12,6 +13,11 @@ urlpatterns = [
     path('', include('apps.movies.urls')),
     path('', include('users.urls')),  # Dodajemy URLs autentykacji
     path('api/test/', api_test, name='api_test'),
+
+    # API Documentation endpoints
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 # Obsługa plików media w trybie deweloperskim
