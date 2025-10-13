@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import movieService from '../../services/movieService';
 import MovieCard from '../../components/MovieCard';
 import { useMultipleWatchlist } from '../../hooks/useWatchlist';
 
 const Home = ({ onMovieSelect, user }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [heroMovies, setHeroMovies] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
 
-  // Combine all movies for watchlist management
-  const allMovies = [...trendingMovies, ...topRatedMovies, ...popularMovies];
+  // Combine all movies for watchlist management - memoized to prevent infinite re-renders
+  const allMovies = useMemo(() => {
+    return [...trendingMovies, ...topRatedMovies, ...popularMovies];
+  }, [trendingMovies, topRatedMovies, popularMovies]);
+
   const { watchlistStatus, toggleWatchlist } = useMultipleWatchlist(allMovies, user);
 
   useEffect(() => {
@@ -20,15 +21,12 @@ const Home = ({ onMovieSelect, user }) => {
       try {
         setIsLoading(true);
 
-        // Fetch all home data in one request
+        // Fe0
         const homeData = await movieService.getHomeData();
 
         setTrendingMovies(homeData.trending.slice(0, 6));
         setTopRatedMovies(homeData.top_rated.slice(0, 6));
         setPopularMovies(homeData.popular.slice(0, 6));
-
-        // Use hero_movies from backend or fallback to trending
-        setHeroMovies(homeData.hero_movies || homeData.trending.slice(0, 3));
 
       } catch (error) {
         console.error('Error fetching movies:', error);
@@ -36,7 +34,6 @@ const Home = ({ onMovieSelect, user }) => {
         setTrendingMovies([]);
         setTopRatedMovies([]);
         setPopularMovies([]);
-        setHeroMovies([]);
       } finally {
         setIsLoading(false);
       }
@@ -45,16 +42,7 @@ const Home = ({ onMovieSelect, user }) => {
     fetchMovies();
   }, []);
 
-  // Auto-slide dla hero carousel
-  useEffect(() => {
-    if (heroMovies.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % heroMovies.length);
-      }, 6000);
 
-      return () => clearInterval(interval);
-    }
-  }, [heroMovies]);
 
   const SectionTitle = ({ title, subtitle }) => (
     <div style={{
@@ -122,135 +110,7 @@ const Home = ({ onMovieSelect, user }) => {
       minHeight: '100vh',
       paddingTop: '80px'
     }}>
-      {/* Hero Carousel */}
-      <section style={{
-        height: '70vh',
-        position: 'relative',
-        overflow: 'hidden',
-        marginBottom: '80px'
-      }}>
-        {heroMovies.map((movie, index) => (
-          <div
-            key={movie.id}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: movie.background ?
-                `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${movie.background})` :
-                'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: index === currentSlide ? 1 : 0,
-              transition: 'opacity 1s ease-in-out',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <div className="container">
-              <div className="row align-items-center" style={{ height: '100%' }}>
-                <div className="col-md-6">
-                  <div style={{
-                    background: 'rgba(79, 70, 229, 0.1)',
-                    borderRadius: '6px',
-                    padding: '6px 12px',
-                    display: 'inline-block',
-                    marginBottom: '16px'
-                  }}>
-                    <span style={{
-                      color: '#a78bfa',
-                      fontSize: '12px',
-                      fontWeight: '600'
-                    }}>
-                      {movie.genres?.[0]?.name || 'Movie'} • {movie.year || (movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A')} • ⭐ {movie.vote_average || 'N/A'}
-                    </span>
-                  </div>
 
-                  <h1 style={{
-                    color: '#e2e8f0',
-                    fontSize: '4rem',
-                    fontWeight: '800',
-                    marginBottom: '20px',
-                    lineHeight: '1.1'
-                  }}>
-                    {movie.title}
-                  </h1>
-
-                  <p style={{
-                    color: '#94a3b8',
-                    fontSize: '18px',
-                    lineHeight: '1.6',
-                    marginBottom: '30px',
-                    maxWidth: '500px'
-                  }}>
-                    {movie.overview || 'No description available.'}
-                  </p>
-
-                  <div style={{
-                    display: 'flex',
-                    gap: '16px'
-                  }}>
-                    <button style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '12px',
-                      padding: '16px 32px',
-                      color: '#e2e8f0',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onClick={() => onMovieSelect && onMovieSelect(movie)}
-                    onMouseOver={(e) => {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                    }}
-                    >
-                      ℹ️ More Info
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Carousel Indicators */}
-        <div style={{
-          position: 'absolute',
-          bottom: '30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '12px'
-        }}>
-          {heroMovies.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              style={{
-                width: index === currentSlide ? '40px' : '12px',
-                height: '4px',
-                borderRadius: '2px',
-                border: 'none',
-                background: index === currentSlide
-                  ? 'linear-gradient(45deg, #4f46e5, #7c3aed)'
-                  : 'rgba(255, 255, 255, 0.3)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          ))}
-        </div>
-      </section>
 
       {/* Main sections */}
       <div className="container">

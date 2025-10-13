@@ -11,26 +11,38 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    password_confirm = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
     role = serializers.ChoiceField(choices=UserProfile.ROLE_CHOICES, default='user', required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'first_name', 'last_name', 'role')
+        fields = ('username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'role')
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password_confirm = attrs.get('password_confirm')
+        
+        if password != password_confirm:
+            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+        
+        return attrs
 
     def create(self, validated_data):
         role = validated_data.pop('role', 'user')
+        password_confirm = validated_data.pop('password_confirm', None)  # Remove password_confirm
+        
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '')
         )
         # Update profile role
-        user.profile.role = role
-        user.profile.save()
+        user.userprofile.role = role
+        user.userprofile.save()
         return user
 
 class UserLoginSerializer(serializers.Serializer):
@@ -54,12 +66,12 @@ class UserLoginSerializer(serializers.Serializer):
         return attrs
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer(read_only=True)
+    userprofile = UserProfileSerializer(read_only=True)
     full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'profile')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'userprofile')
         read_only_fields = ('id', 'date_joined')
     
     def get_full_name(self, obj):

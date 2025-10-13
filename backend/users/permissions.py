@@ -9,8 +9,8 @@ class IsAdminUser(permissions.BasePermission):
         return (
             request.user and 
             request.user.is_authenticated and 
-            hasattr(request.user, 'profile') and 
-            request.user.profile.is_admin
+            hasattr(request.user, 'userprofile') and 
+            request.user.userprofile.is_admin
         )
 
 class IsOwnerOrAdmin(permissions.BasePermission):
@@ -29,7 +29,7 @@ class IsOwnerOrAdmin(permissions.BasePermission):
         # Write permissions only to the owner or admin
         return (
             obj.user == request.user or
-            (hasattr(request.user, 'profile') and request.user.profile.is_admin)
+            (hasattr(request.user, 'userprofile') and request.user.userprofile.is_admin)
         )
 
 class IsUserOrAdmin(permissions.BasePermission):
@@ -41,6 +41,6 @@ class IsUserOrAdmin(permissions.BasePermission):
         return (
             request.user and 
             request.user.is_authenticated and 
-            hasattr(request.user, 'profile') and 
-            request.user.profile.role in ['user', 'admin']
+            hasattr(request.user, 'userprofile') and 
+            request.user.userprofile.role in ['user', 'admin']
         )

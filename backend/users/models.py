@@ -9,7 +9,7 @@ class UserProfile(models.Model):
         ('admin', 'Admin'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -32,7 +32,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'profile'):
-        instance.profile.save()
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()
     else:
         UserProfile.objects.create(user=instance)

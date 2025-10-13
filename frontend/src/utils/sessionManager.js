@@ -113,8 +113,8 @@ class SessionManager {
       this.startSessionCheck();
     }
 
-    // Listen for authentication changes
-    window.addEventListener('storage', (e) => {
+    // Store event handlers for cleanup
+    this.storageHandler = (e) => {
       if (e.key === 'isAuthenticated') {
         if (e.newValue === 'true') {
           this.startSessionCheck();
@@ -122,14 +122,33 @@ class SessionManager {
           this.stopSessionCheck();
         }
       }
-    });
+    };
 
-    // Check session on page focus (user returns to tab)
-    document.addEventListener('visibilitychange', () => {
+    this.visibilityHandler = () => {
       if (!document.hidden && authService.isAuthenticated()) {
         this.checkSession();
       }
-    });
+    };
+
+    // Listen for authentication changes
+    window.addEventListener('storage', this.storageHandler);
+
+    // Check session on page focus (user returns to tab)
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+  }
+
+  // Cleanup method for component unmounting
+  cleanup() {
+    this.stopSessionCheck();
+    
+    // Remove event listeners
+    if (this.storageHandler) {
+      window.removeEventListener('storage', this.storageHandler);
+    }
+    
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+    }
   }
 }
 

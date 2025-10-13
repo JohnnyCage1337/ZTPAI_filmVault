@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 import json
+from .models import UserProfile
 
 
 class UserModelTestCase(TestCase):
@@ -307,3 +309,284 @@ class AuthEndpointPermissionsTestCase(APITestCase):
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class UserProfileModelTestCase(TestCase):
+    """Test cases for UserProfile model"""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            password="testpass123"
+        )
+
+    def test_user_profile_creation(self):
+        """Test that UserProfile is created automatically"""
+        self.assertTrue(hasattr(self.user, 'userprofile'))
+        self.assertEqual(self.user.userprofile.role, 'user')
+
+    def test_user_profile_admin_role(self):
+        """Test admin role functionality"""
+        self.user.userprofile.role = 'admin'
+        self.user.userprofile.save()
+        self.assertTrue(self.user.userprofile.is_admin)
+        self.assertFalse(self.user.userprofile.is_user)
+
+    def test_user_profile_user_role(self):
+        """Test user role functionality"""
+        self.user.userprofile.role = 'user'
+        self.user.userprofile.save()
+        self.assertTrue(self.user.userprofile.is_user)
+        self.assertFalse(self.user.userprofile.is_admin)
+
+    def test_user_profile_string_representation(self):
+        """Test UserProfile string representation"""
+        expected = f"{self.user.username} - {self.user.userprofile.role}"
+        self.assertEqual(str(self.user.userprofile), expected)
+
+
+class JWTAuthenticationAPITestCase(APITestCase):
+    """Test cases for JWT Authentication API endpoints"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.register_url = '/api/v1/auth/register/'
+        self.login_url = '/api/v1/auth/login/'
+        self.logout_url = '/api/v1/auth/logout/'
+        self.profile_url = '/api/v1/auth/profile/'
+        self.refresh_url = '/api/v1/auth/refresh/'
+        self.check_auth_url = '/api/v1/auth/check/'
+
+        self.user_data = {
+            'username': 'jwtuser',
+            'email': 'jwt@example.com',
+            'password': 'jwtpass123',
+            'first_name': 'JWT',
+            'last_name': 'User'
+        }
+
+    def test_jwt_registration_success(self):
+        """Test JWT registration endpoint"""
+        response = self.client.post(
+            self.register_url,
+            self.user_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('user', response.data)
+        # Check if cookies are set (they should be in headers)
+        self.assertIn('Set-Cookie', response.headers)
+
+    def test_jwt_login_success(self):
+        """Test JWT login endpoint with cookies"""
+        # Create user first
+        User.objects.create_user(
+            username='jwtuser',
+            password='jwtpass123'
+        )
+
+        login_data = {
+            'username': 'jwtuser',
+            'password': 'jwtpass123'
+        }
+
+        response = self.client.post(
+            self.login_url,
+            login_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('user', response.data)
+        self.assertIn('Set-Cookie', response.headers)
+
+    def test_jwt_login_invalid_credentials(self):
+        """Test JWT login with invalid credentials"""
+        User.objects.create_user(username='jwtuser', password='jwtpass123')
+
+        login_data = {
+            'username': 'jwtuser',
+            'password': 'wrongpassword'
+        }
+
+        response = self.client.post(
+            self.login_url,
+            login_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_jwt_logout_success(self):
+        """Test JWT logout endpoint"""
+        user = User.objects.create_user(username='jwtuser', password='pass123')
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        # Set cookies manually for testing
+        self.client.cookies['access_token'] = access_token
+        self.client.cookies['refresh_token'] = str(refresh)
+
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_jwt_refresh_token(self):
+        """Test JWT refresh token endpoint"""
+        user = User.objects.create_user(username='jwtuser', password='pass123')
+        refresh = RefreshToken.for_user(user)
+
+        self.client.cookies['refresh_token'] = str(refresh)
+
+        response = self.client.post(self.refresh_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_jwt_check_auth_authenticated(self):
+        """Test JWT check auth with valid token"""
+        user = User.objects.create_user(username='jwtuser', password='pass123')
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        self.client.cookies['access_token'] = access_token
+
+        response = self.client.get(self.check_auth_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_jwt_check_auth_unauthenticated(self):
+        """Test JWT check auth without token"""
+        response = self.client.get(self.check_auth_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_jwt_profile_access_authenticated(self):
+        """Test JWT profile access with valid token"""
+        user = User.objects.create_user(
+            username='jwtuser',
+            email='jwt@example.com',
+            first_name='JWT',
+            last_name='User'
+        )
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        self.client.cookies['access_token'] = access_token
+
+        response = self.client.get(self.profile_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], 'jwtuser')
+
+    def test_jwt_profile_update(self):
+        """Test JWT profile update"""
+        user = User.objects.create_user(username='jwtuser', email='old@example.com')
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        self.client.cookies['access_token'] = access_token
+
+        update_data = {
+            'email': 'new@example.com',
+            'first_name': 'Updated'
+        }
+
+        response = self.client.put(
+            self.profile_url,
+            update_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class AdminEndpointsTestCase(APITestCase):
+    """Test cases for Admin endpoints"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin_user = User.objects.create_user(
+            username='adminuser',
+            password='adminpass123'
+        )
+        self.admin_user.userprofile.role = 'admin'
+        self.admin_user.userprofile.save()
+
+        self.regular_user = User.objects.create_user(
+            username='regularuser',
+            password='userpass123'
+        )
+
+        # Admin endpoints
+        self.list_users_url = '/api/v1/admin/users/'
+        self.update_role_url = '/api/v1/admin/users/role/'
+
+    def get_admin_token(self):
+        """Helper to get admin JWT token"""
+        refresh = RefreshToken.for_user(self.admin_user)
+        return str(refresh.access_token)
+
+    def get_user_token(self):
+        """Helper to get regular user JWT token"""
+        refresh = RefreshToken.for_user(self.regular_user)
+        return str(refresh.access_token)
+
+    def test_admin_list_users_success(self):
+        """Test admin can list users"""
+        self.client.cookies['access_token'] = self.get_admin_token()
+        
+        response = self.client.get(self.list_users_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 2)  # At least admin and regular user
+
+    def test_admin_list_users_forbidden_for_regular_user(self):
+        """Test regular user cannot list users"""
+        self.client.cookies['access_token'] = self.get_user_token()
+        
+        response = self.client.get(self.list_users_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_update_user_role_success(self):
+        """Test admin can update user role"""
+        self.client.cookies['access_token'] = self.get_admin_token()
+        
+        data = {
+            'user_id': self.regular_user.id,
+            'role': 'admin'
+        }
+        
+        response = self.client.post(self.update_role_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify role was updated
+        self.regular_user.refresh_from_db()
+        self.assertEqual(self.regular_user.userprofile.role, 'admin')
+
+    def test_admin_update_user_role_forbidden_for_regular_user(self):
+        """Test regular user cannot update roles"""
+        self.client.cookies['access_token'] = self.get_user_token()
+        
+        data = {
+            'user_id': self.regular_user.id,
+            'role': 'admin'
+        }
+        
+        response = self.client.post(self.update_role_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_update_user_role_invalid_role(self):
+        """Test admin update with invalid role"""
+        self.client.cookies['access_token'] = self.get_admin_token()
+        
+        data = {
+            'user_id': self.regular_user.id,
+            'role': 'invalid_role'
+        }
+        
+        response = self.client.post(self.update_role_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_admin_update_nonexistent_user(self):
+        """Test admin update nonexistent user"""
+        self.client.cookies['access_token'] = self.get_admin_token()
+        
+        data = {
+            'user_id': 99999,
+            'role': 'admin'
+        }
+        
+        response = self.client.post(self.update_role_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

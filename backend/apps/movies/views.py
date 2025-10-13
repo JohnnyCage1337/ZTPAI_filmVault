@@ -13,6 +13,7 @@ from .serializers import (
     MovieListSerializer, MovieDetailSerializer, GenreSerializer,
     MovieRatingSerializer, WatchlistSerializer
 )
+from .filters import MovieFilter
 
 @extend_schema(
     summary="Get home page data",
@@ -93,9 +94,9 @@ class MovieListView(generics.ListAPIView):
     serializer_class = MovieListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['genres', 'status']
-    search_fields = ['title', 'overview', 'og_title']
-    ordering_fields = ['vote_average', 'popularity', 'release_date', 'runtime']
+    filterset_class = MovieFilter
+    search_fields = ['title', 'overview', 'og_title', 'director__name']
+    ordering_fields = ['vote_average', 'popularity', 'release_date', 'runtime', 'title']
     ordering = ['-popularity']
 
 @extend_schema(

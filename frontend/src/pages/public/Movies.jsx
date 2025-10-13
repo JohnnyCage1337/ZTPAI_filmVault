@@ -31,7 +31,7 @@ const Movies = ({ onMovieSelect, user }) => {
       setError(null);
 
       // Build URL with pagination and optional genre filter
-      let url = `http://localhost:8000/movies/?page=${page}&page_size=${moviesPerPage}`;
+      let url = `http://localhost:8000/api/v1/movies/?page=${page}&page_size=${moviesPerPage}`;
       if (genreSlug) {
         url += `&genres=${genreSlug}`;
       }

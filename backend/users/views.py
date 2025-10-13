@@ -1,5 +1,5 @@
 from rest_framework import status, generics
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -71,9 +71,9 @@ def set_jwt_cookies(response, user):
     },
     tags=['Authentication']
 )
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def register_view(request):
     """
     Rejestracja nowego użytkownika z JWT
@@ -82,15 +82,14 @@ def register_view(request):
     if serializer.is_valid():
         user = serializer.save()
         
-        response = Response({
-            'message': 'User created successfully',
-            'user': UserSerializer(user).data,
+        return Response({
+            'message': 'Account created successfully. You can now log in.',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
         }, status=status.HTTP_201_CREATED)
-        
-        # Set JWT cookies
-        response, access_token, refresh_token = set_jwt_cookies(response, user)
-        
-        return response
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema(
@@ -119,9 +118,9 @@ def register_view(request):
     },
     tags=['Authentication']
 )
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def login_view(request):
     """
     Logowanie użytkownika z JWT
@@ -361,8 +360,8 @@ def update_user_role(request):
     
     try:
         user = User.objects.get(id=user_id)
-        user.profile.role = new_role
-        user.profile.save()
+        user.userprofile.role = new_role
+        user.userprofile.save()
         
         return Response({
             'message': f'User role updated to {new_role}',

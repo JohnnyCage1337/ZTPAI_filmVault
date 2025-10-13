@@ -19,12 +19,6 @@ const Footer = () => {
               marginBottom: '20px',
               justifyContent: 'center'
             }}>
-              <span style={{
-                fontSize: '2rem',
-                filter: 'drop-shadow(0 0 10px rgba(79, 70, 229, 0.8))'
-              }}>
-                🎬
-              </span>
               <h3 style={{
                 margin: 0,
                 fontSize: '1.5rem',
@@ -98,34 +92,14 @@ const Footer = () => {
           marginTop: '40px'
         }}>
           <div className="row align-items-center">
-            <div className="col-md-6">
+            <div className="col-12 text-center">
               <p style={{
                 color: '#64748b',
                 fontSize: '13px',
                 margin: 0
               }}>
-                © 2025 FilmVault. All rights reserved. Made with ❤️ for movie lovers.
+                © 2025 FilmVault. All rights reserved.
               </p>
-            </div>
-            <div className="col-md-6">
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '20px'
-              }}>
-                <span style={{
-                  color: '#64748b',
-                  fontSize: '13px'
-                }}>
-                  🌟 Powered by TMDB API
-                </span>
-                <span style={{
-                  color: '#64748b',
-                  fontSize: '13px'
-                }}>
-                  🚀 Built with React & Django
-                </span>
-              </div>
             </div>
           </div>
         </div>

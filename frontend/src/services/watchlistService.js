@@ -1,32 +1,19 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+import { authService } from './authService.js';
 
-// Get authentication token
-const getAuthToken = () => {
-  const token = localStorage.getItem('access_token');
-  return token ? `Bearer ${token}` : null;
-};
-
-// Create headers with authentication
-const createAuthHeaders = () => {
-  const token = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: token })
-  };
-};
+const API_BASE_URL = 'http://localhost:8000';
 
 // Toggle movie in watchlist (add/remove)
 export const toggleWatchlist = async (movieSlug) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/movies/${movieSlug}/watchlist/`, {
-      method: 'POST',
-      headers: createAuthHeaders()
+    const response = await authService.apiCall(`${API_BASE_URL}/api/v1/movies/${movieSlug}/watchlist/`, {
+      method: 'POST'
     });
 
+    if (!response) {
+      throw new Error('Authentication required');
+    }
+
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication required');
-      }
       throw new Error('Failed to toggle watchlist');
     }
 
@@ -40,15 +27,15 @@ export const toggleWatchlist = async (movieSlug) => {
 // Check if movie is in watchlist
 export const checkWatchlistStatus = async (movieSlug) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/movies/${movieSlug}/watchlist-status/`, {
-      method: 'GET',
-      headers: createAuthHeaders()
+    const response = await authService.apiCall(`${API_BASE_URL}/api/v1/movies/${movieSlug}/watchlist/status/`, {
+      method: 'GET'
     });
 
+    if (!response) {
+      throw new Error('Authentication required');
+    }
+
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication required');
-      }
       throw new Error('Failed to check watchlist status');
     }
 
@@ -62,15 +49,15 @@ export const checkWatchlistStatus = async (movieSlug) => {
 // Get user's complete watchlist
 export const getUserWatchlist = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/watchlist/`, {
-      method: 'GET',
-      headers: createAuthHeaders()
+    const response = await authService.apiCall(`${API_BASE_URL}/api/v1/users/watchlist/`, {
+      method: 'GET'
     });
 
+    if (!response) {
+      throw new Error('Authentication required');
+    }
+
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication required');
-      }
       throw new Error('Failed to get watchlist');
     }
 

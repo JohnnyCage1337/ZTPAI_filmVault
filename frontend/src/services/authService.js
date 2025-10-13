@@ -115,7 +115,7 @@ export const authService = {
             return this.checkAuth(); // Retry after refresh
           }
         }
-        
+
         localStorage.removeItem('user');
         localStorage.removeItem('isAuthenticated');
         return { success: false, expired: data.error === 'Token expired' };
@@ -159,14 +159,14 @@ export const authService = {
     try {
       let response = await fetch(url, defaultOptions);
 
-      // If token expired, try to refresh and retry
+
       if (response.status === 401) {
         const refreshResult = await authService.refreshToken();
         if (refreshResult.success) {
-          // Retry the original request
+
           response = await fetch(url, defaultOptions);
         } else {
-          // Redirect to login or show session expired message
+          
           window.location.href = '/login';
           return null;
         }

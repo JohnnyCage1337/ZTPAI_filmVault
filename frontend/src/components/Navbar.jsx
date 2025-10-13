@@ -73,7 +73,6 @@ const Navbar = ({ user, onLogout, onLogin }) => {
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.pageYOffset > 50;
-      console.log('Scroll position:', window.pageYOffset, 'Is scrolled:', scrolled);
       setIsScrolled(scrolled);
     };
 
@@ -254,14 +253,14 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                       fontWeight: '600',
                       fontSize: '16px'
                     }}>
-                      {user.username.charAt(0).toUpperCase()}
+                      👤
                     </div>
                     <span style={{
                       color: '#e2e8f0',
                       fontSize: '14px',
                       fontWeight: '500'
                     }}>
-                      {user.username}
+                      User
                     </span>
                     <button
                       onClick={onLogout}
@@ -318,7 +317,7 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                   fontWeight: '600',
                   fontSize: '14px'
                 }}>
-                  {user.username.charAt(0).toUpperCase()}
+                  👤
                 </div>
               )}
 
@@ -468,7 +467,7 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                   fontWeight: '600',
                   fontSize: '20px'
                 }}>
-                  {user.username.charAt(0).toUpperCase()}
+                  👤
                 </div>
                 <div>
                   <h3 style={{
@@ -478,7 +477,7 @@ const Navbar = ({ user, onLogout, onLogin }) => {
                     margin: 0,
                     marginBottom: '4px'
                   }}>
-                    {user.username}
+                    User
                   </h3>
                   <p style={{
                     color: '#94a3b8',

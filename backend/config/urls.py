@@ -10,14 +10,16 @@ def api_test(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.movies.urls')),
-    path('', include('users.urls')),  # Dodajemy URLs autentykacji
+    path('api/v1/', include('apps.movies.urls')),
+    path('api/v1/', include('users.urls')),
+    # Additional mapping for frontend compatibility
+    path('api/', include('users.urls')),
     path('api/test/', api_test, name='api_test'),
 
     # API Documentation endpoints
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/v1/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 # Obsługa plików media w trybie deweloperskim

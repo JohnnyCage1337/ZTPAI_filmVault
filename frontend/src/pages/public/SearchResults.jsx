@@ -183,7 +183,7 @@ const SearchResults = ({ user }) => {
                   }}
                 >
                   <option value="">Wszystkie gatunki</option>
-                  {genres.map(genre => (
+                  {Array.isArray(genres) && genres.map(genre => (
                     <option key={genre.id} value={genre.slug}>
                       {genre.name}
                     </option>

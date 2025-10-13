@@ -3,17 +3,16 @@ import React, { useState } from 'react';
 const LoginPage = ({ onSwitchToRegister, onLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
-    password: '',
-    rememberMe: false
+    password: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     });
     if (error) setError('');
   };
@@ -50,29 +49,14 @@ const LoginPage = ({ onSwitchToRegister, onLogin }) => {
           setError('Login failed. Please try again.');
         }
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = async (userType) => {
-    const demoCredentials = {
-      admin: { username: 'admin', password: 'admin123' },
-      user: { username: 'JohnnyCage1337', password: 'johnny123' },
-      moderator: { username: 'demo_mod', password: 'mod123' }
-    };
 
-    const creds = demoCredentials[userType];
-    setFormData({ ...formData, ...creds });
-
-    // Automatyczne logowanie po ustawieniu danych demo
-    setTimeout(() => {
-      const fakeEvent = { preventDefault: () => {} };
-      setFormData(prev => ({ ...prev, ...creds }));
-    }, 100);
-  };
 
   return (
     <div style={{
@@ -120,7 +104,7 @@ const LoginPage = ({ onSwitchToRegister, onLogin }) => {
             marginBottom: '8px',
             letterSpacing: '-0.025em'
           }}>
-            🎬 FilmVault
+            FilmVault
           </div>
           <p style={{
             color: '#94a3b8',
@@ -234,41 +218,7 @@ const LoginPage = ({ onSwitchToRegister, onLogin }) => {
             />
           </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '30px'
-          }}>
-            <label style={{
-              display: 'flex',
-              alignItems: 'center',
-              color: '#94a3b8',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                style={{
-                  marginRight: '8px',
-                  accentColor: '#4f46e5'
-                }}
-              />
-              Remember me
-            </label>
-            <a href="#" style={{
-              color: '#4f46e5',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
-              Forgot password?
-            </a>
-          </div>
+
 
           {/* Login Button */}
           <button
@@ -286,7 +236,7 @@ const LoginPage = ({ onSwitchToRegister, onLogin }) => {
               fontSize: '16px',
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
-              marginBottom: '30px',
+              marginBottom: '20px',
               transition: 'all 0.3s ease',
               boxShadow: '0 4px 15px rgba(79, 70, 229, 0.4)'
             }}
@@ -321,57 +271,7 @@ const LoginPage = ({ onSwitchToRegister, onLogin }) => {
             )}
           </button>
 
-          {/* Demo Login Buttons */}
-          <div style={{
-            borderTop: '1px solid rgba(148, 163, 184, 0.2)',
-            paddingTop: '20px',
-            textAlign: 'center'
-          }}>
-            <p style={{
-              color: '#64748b',
-              fontSize: '14px',
-              marginBottom: '15px'
-            }}>
-              Quick Demo Access:
-            </p>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              flexWrap: 'wrap',
-              justifyContent: 'center'
-            }}>
-              {['user', 'admin', 'moderator'].map(type => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => handleDemoLogin(type)}
-                  disabled={loading}
-                  style={{
-                    padding: '8px 16px',
-                    background: 'rgba(79, 70, 229, 0.1)',
-                    border: '1px solid rgba(79, 70, 229, 0.3)',
-                    borderRadius: '8px',
-                    color: '#a78bfa',
-                    fontSize: '12px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!loading) {
-                      e.target.style.background = 'rgba(79, 70, 229, 0.2)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!loading) {
-                      e.target.style.background = 'rgba(79, 70, 229, 0.1)';
-                    }
-                  }}
-                >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* Register Link */}
           <div style={{

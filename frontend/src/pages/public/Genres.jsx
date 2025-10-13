@@ -132,7 +132,7 @@ const Genres = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:8000/genres/');
+      const response = await fetch('http://localhost:8000/api/v1/genres/');
 
       if (!response.ok) {
         throw new Error('Failed to fetch genres');

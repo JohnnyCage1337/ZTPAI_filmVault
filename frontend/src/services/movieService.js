@@ -1,19 +1,16 @@
+import { authService } from './authService.js';
+
 const API_BASE = 'http://localhost:8000';
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Token ${token}` })
-  };
-};
-
 export default {
-  // Get home page data (all data in one request)
+  // Get home page data (all data in one request) - PUBLIC
   getHomeData: async () => {
     try {
-      const response = await fetch(`${API_BASE}/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -27,12 +24,15 @@ export default {
     }
   },
 
-  // Get all movies with optional filtering
+  // Get all movies with optional filtering - PUBLIC
   getMovies: async (params = {}) => {
     try {
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${API_BASE}/movies/${queryString ? `?${queryString}` : ''}`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/${queryString ? `?${queryString}` : ''}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -46,11 +46,14 @@ export default {
     }
   },
 
-  // Get movie details by slug
+  // Get movie details by slug - PUBLIC
   getMovieDetails: async (slug) => {
     try {
-      const response = await fetch(`${API_BASE}/movies/${slug}/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/${slug}/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -64,11 +67,14 @@ export default {
     }
   },
 
-  // Get trending movies
+  // Get trending movies - PUBLIC
   getTrendingMovies: async () => {
     try {
-      const response = await fetch(`${API_BASE}/movies/trending/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/trending/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -82,11 +88,14 @@ export default {
     }
   },
 
-  // Get top rated movies
+  // Get top rated movies - PUBLIC
   getTopRatedMovies: async () => {
     try {
-      const response = await fetch(`${API_BASE}/movies/top-rated/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/top-rated/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -100,11 +109,14 @@ export default {
     }
   },
 
-  // Get popular movies
+  // Get popular movies - PUBLIC
   getPopularMovies: async () => {
     try {
-      const response = await fetch(`${API_BASE}/movies/popular/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/popular/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -118,14 +130,17 @@ export default {
     }
   },
 
-  // Rate a movie (requires authentication)
+  // Rate a movie (requires authentication) - AUTH REQUIRED
   rateMovie: async (movieSlug, rating, review = '') => {
     try {
-      const response = await fetch(`${API_BASE}/movies/${movieSlug}/rate/`, {
+      const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/ratings/`, {
         method: 'POST',
-        headers: getAuthHeaders(),
         body: JSON.stringify({ rating, review }),
       });
+
+      if (!response) {
+        throw new Error('Authentication required');
+      }
 
       if (response.ok) {
         return await response.json();
@@ -139,12 +154,16 @@ export default {
     }
   },
 
-  // Get user's rating for a movie
+  // Get user's rating for a movie - AUTH REQUIRED
   getUserRating: async (movieSlug) => {
     try {
-      const response = await fetch(`${API_BASE}/movies/${movieSlug}/rating/`, {
-        headers: getAuthHeaders(),
+      const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/ratings/me/`, {
+        method: 'GET'
       });
+
+      if (!response) {
+        throw new Error('Authentication required');
+      }
 
       if (response.ok) {
         return await response.json();
@@ -159,14 +178,17 @@ export default {
     }
   },
 
-  // Toggle movie in watchlist
+  // Toggle movie in watchlist - AUTH REQUIRED
   toggleWatchlist: async (movieSlug, add = true) => {
     try {
       const method = add ? 'POST' : 'DELETE';
-      const response = await fetch(`${API_BASE}/movies/${movieSlug}/watchlist/`, {
-        method,
-        headers: getAuthHeaders(),
+      const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/watchlist/`, {
+        method
       });
+
+      if (!response) {
+        throw new Error('Authentication required');
+      }
 
       if (response.ok || response.status === 204) {
         const data = response.status === 204 ? {} : await response.json();
@@ -181,12 +203,16 @@ export default {
     }
   },
 
-  // Check if movie is in user's watchlist
+  // Check if movie is in user's watchlist - AUTH REQUIRED
   checkWatchlistStatus: async (movieSlug) => {
     try {
-      const response = await fetch(`${API_BASE}/movies/${movieSlug}/watchlist-status/`, {
-        headers: getAuthHeaders(),
+      const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/watchlist/status/`, {
+        method: 'GET'
       });
+
+      if (!response) {
+        return { in_watchlist: false };
+      }
 
       if (response.ok) {
         return await response.json();
@@ -199,12 +225,16 @@ export default {
     }
   },
 
-  // Get user's watchlist
+  // Get user's watchlist - AUTH REQUIRED
   getUserWatchlist: async () => {
     try {
-      const response = await fetch(`${API_BASE}/watchlist/`, {
-        headers: getAuthHeaders(),
+      const response = await authService.apiCall(`${API_BASE}/api/v1/users/watchlist/`, {
+        method: 'GET'
       });
+
+      if (!response) {
+        throw new Error('Authentication required');
+      }
 
       if (response.ok) {
         return await response.json();
@@ -217,11 +247,14 @@ export default {
     }
   },
 
-  // Get genres
+  // Get genres - PUBLIC
   getGenres: async () => {
     try {
-      const response = await fetch(`${API_BASE}/genres/`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/genres/`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
@@ -235,11 +268,14 @@ export default {
     }
   },
 
-  // Search movies
+  // Search movies - PUBLIC
   searchMovies: async (query) => {
     try {
-      const response = await fetch(`${API_BASE}/search/?q=${encodeURIComponent(query)}`, {
-        headers: getAuthHeaders(),
+      const response = await fetch(`${API_BASE}/api/v1/movies/search/?q=${encodeURIComponent(query)}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {

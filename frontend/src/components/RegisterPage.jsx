@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
-const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
+const RegisterPage = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: ''
+    password: '',
+    password_confirm: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,20 +40,17 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Po rejestracji automatycznie zaloguj użytkownika
-        if (onRegister) {
-          onRegister(data.user);
-        } else {
-          setSuccess('Account created successfully! You can now log in.');
-          setFormData({
-            username: '',
-            email: '',
-            password: ''
-          });
-          setTimeout(() => {
-            onSwitchToLogin();
-          }, 2000);
-        }
+        // Po rejestracji pokaż sukces i przejdź do logowania
+        setSuccess('Account created successfully! You can now log in.');
+        setFormData({
+          username: '',
+          email: '',
+          password: '',
+          password_confirm: ''
+        });
+        setTimeout(() => {
+          onSwitchToLogin();
+        }, 2000);
       } else {
         if (data.username) {
           setError(data.username[0]);
@@ -64,7 +62,8 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
           setError('Registration failed. Please try again.');
         }
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Registration error:', error);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -249,7 +248,7 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
           </div>
 
           {/* Password Field */}
-          <div style={{ marginBottom: '30px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <label style={{
               display: 'block',
               color: '#e2e8f0',
@@ -264,17 +263,59 @@ const RegisterPage = ({ onSwitchToLogin, onRegister }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Password"
+              placeholder="Enter password"
               disabled={loading}
               required
               style={{
                 width: '100%',
-                padding: '12px 15px',
+                padding: '15px 18px',
                 background: 'rgba(30, 41, 59, 0.7)',
                 border: '2px solid rgba(79, 70, 229, 0.3)',
                 borderRadius: '12px',
                 color: '#e2e8f0',
-                fontSize: '14px',
+                fontSize: '16px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#4f46e5';
+                e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+          </div>
+
+          {/* Confirm Password Field */}
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{
+              display: 'block',
+              color: '#e2e8f0',
+              fontSize: '14px',
+              fontWeight: '500',
+              marginBottom: '8px'
+            }}>
+              Confirm Password *
+            </label>
+            <input
+              type="password"
+              name="password_confirm"
+              value={formData.password_confirm}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+              disabled={loading}
+              required
+              style={{
+                width: '100%',
+                padding: '15px 18px',
+                background: 'rgba(30, 41, 59, 0.7)',
+                border: '2px solid rgba(79, 70, 229, 0.3)',
+                borderRadius: '12px',
+                color: '#e2e8f0',
+                fontSize: '16px',
                 outline: 'none',
                 boxSizing: 'border-box',
                 transition: 'all 0.3s ease'

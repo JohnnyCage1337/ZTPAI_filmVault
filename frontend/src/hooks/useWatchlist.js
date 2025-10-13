@@ -8,22 +8,30 @@ export const useWatchlist = (movie, user) => {
 
   // Check initial watchlist status
   useEffect(() => {
-    if (user && movie?.slug) {
-      const checkStatus = async () => {
-        try {
-          setIsLoading(true);
-          const response = await checkWatchlistStatus(movie.slug);
-          setIsInWatchlist(response.in_watchlist);
-        } catch (error) {
-          console.error('Error checking watchlist status:', error);
-          setIsInWatchlist(false);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    // Clear previous status first
+    setIsInWatchlist(false);
+    setIsLoading(false);
 
-      checkStatus();
+    // Only proceed if user is authenticated AND we have a movie slug
+    // Be very strict about authentication requirements
+    if (!user || typeof user !== 'object' || !user.id || !movie?.slug) {
+      return;
     }
+
+    const checkStatus = async () => {
+      try {
+        setIsLoading(true);
+        const response = await checkWatchlistStatus(movie.slug);
+        setIsInWatchlist(response.in_watchlist);
+      } catch (error) {
+        console.error('Error checking watchlist status:', error);
+        setIsInWatchlist(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkStatus();
   }, [movie?.slug, user]);
 
   // Toggle watchlist status
@@ -57,22 +65,31 @@ export const useMultipleWatchlist = (movies, user) => {
 
   // Check watchlist status for all movies
   useEffect(() => {
-    if (user && movies?.length > 0) {
-      const checkMultipleStatus = async () => {
-        try {
-          setIsLoading(true);
-          const statusMap = await checkMultipleWatchlistStatus(movies);
-          setWatchlistStatus(statusMap);
-        } catch (error) {
-          console.error('Error checking multiple watchlist status:', error);
-          setWatchlistStatus({});
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      checkMultipleStatus();
+    // Clear previous status first
+    setWatchlistStatus({});
+    setIsLoading(false);
+    
+    // Only proceed if user is authenticated AND we have movies to check
+    // Be very strict about authentication requirements
+    if (!user || typeof user !== 'object' || !user.id || !movies?.length) {
+      return;
     }
+
+    const checkMultipleStatus = async () => {
+      try {
+        setIsLoading(true);
+        const statusMap = await checkMultipleWatchlistStatus(movies);
+        setWatchlistStatus(statusMap);
+      } catch (error) {
+        console.error('Error checking multiple watchlist status:', error);
+        // Reset status on error instead of keeping previous state
+        setWatchlistStatus({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkMultipleStatus();
   }, [movies, user]);
 
   // Toggle individual movie in watchlist

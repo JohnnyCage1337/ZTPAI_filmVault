@@ -1,7 +1,7 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.conf import settings
-import jwt
 
 class JWTCookieAuthentication(JWTAuthentication):
     """
@@ -27,17 +27,10 @@ class JWTCookieAuthentication(JWTAuthentication):
         Validates an encoded JSON web token and returns a validated token
         wrapper object.
         """
-        messages = []
-        for AuthToken in self.get_token_types():
-            try:
-                return AuthToken(raw_token)
-            except TokenError as e:
-                messages.append({
-                    'token_class': AuthToken.__name__,
-                    'message': e.args[0],
-                })
-
-        raise InvalidToken({
-            'detail': 'Given token not valid for any token type',
-            'messages': messages,
-        })
+        try:
+            return AccessToken(raw_token)
+        except TokenError as e:
+            raise InvalidToken({
+                'detail': 'Given token not valid',
+                'message': str(e),
+            })
