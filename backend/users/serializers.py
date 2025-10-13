@@ -23,16 +23,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs.get('password')
         password_confirm = attrs.get('password_confirm')
-        
+
         if password != password_confirm:
             raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
-        
+
         return attrs
 
     def create(self, validated_data):
         role = validated_data.pop('role', 'user')
         password_confirm = validated_data.pop('password_confirm', None)  # Remove password_confirm
-        
+
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -73,6 +73,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'userprofile')
         read_only_fields = ('id', 'date_joined')
-    
+
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip()

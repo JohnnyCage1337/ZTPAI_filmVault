@@ -76,10 +76,8 @@ const Navbar = ({ user, onLogout, onLogin }) => {
       setIsScrolled(scrolled);
     };
 
-    // Check initial scroll position
     handleScroll();
 
-    // Add event listener
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
@@ -89,14 +87,12 @@ const Navbar = ({ user, onLogout, onLogin }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      // Close mobile menu on desktop resize
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
       }
     };
 
     const handleClickOutside = (event) => {
-      // Close mobile menu when clicking outside, but not on hamburger button or menu itself
       if (isMobileMenuOpen &&
         !event.target.closest('.mobile-menu-container') &&
         !event.target.closest('.mobile-menu-button')) {

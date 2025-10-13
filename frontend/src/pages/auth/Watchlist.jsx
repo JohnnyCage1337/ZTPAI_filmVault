@@ -10,11 +10,9 @@ const Watchlist = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Watchlist management for removing items
   const { toggleWatchlist } = useMultipleWatchlist(movies, user);
 
   useEffect(() => {
-    // Redirect if not logged in
     if (!user) {
       navigate('/login');
       return;

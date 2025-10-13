@@ -12,17 +12,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('apps.movies.urls')),
     path('api/v1/', include('users.urls')),
-    # Additional mapping for frontend compatibility
     path('api/', include('users.urls')),
     path('api/test/', api_test, name='api_test'),
 
-    # API Documentation endpoints
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/v1/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
-# Obsługa plików media w trybie deweloperskim
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

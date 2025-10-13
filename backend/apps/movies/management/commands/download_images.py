@@ -15,7 +15,6 @@ class Command(BaseCommand):
         limit = options['limit']
         self.stdout.write('Downloading sample images...')
 
-        # Sample poster URLs from TMDB (these are real poster URLs)
         sample_posters = [
             'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',  # Oppenheimer
             'https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg',  # Barbie

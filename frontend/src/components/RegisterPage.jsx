@@ -40,7 +40,6 @@ const RegisterPage = ({ onSwitchToLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Po rejestracji pokaż sukces i przejdź do logowania
         setSuccess('Account created successfully! You can now log in.');
         setFormData({
           username: '',

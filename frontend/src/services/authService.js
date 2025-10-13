@@ -166,7 +166,7 @@ export const authService = {
 
           response = await fetch(url, defaultOptions);
         } else {
-          
+
           window.location.href = '/login';
           return null;
         }

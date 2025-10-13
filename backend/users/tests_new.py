@@ -140,7 +140,7 @@ class AuthenticationAPITestCase(APITestCase):
         """Test POST /api/v1/auth/logout/"""
         # First authenticate
         self.authenticate_user()
-        
+
         url = '/api/v1/auth/logout/'
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -149,7 +149,7 @@ class AuthenticationAPITestCase(APITestCase):
         """Test POST /api/v1/auth/refresh/"""
         tokens = self.get_jwt_token(self.user)
         self.client.cookies['refresh_token'] = tokens['refresh']
-        
+
         url = '/api/v1/auth/refresh/'
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -158,7 +158,7 @@ class AuthenticationAPITestCase(APITestCase):
     def test_refresh_token_invalid(self):
         """Test refresh with invalid token"""
         self.client.cookies['refresh_token'] = 'invalid_token'
-        
+
         url = '/api/v1/auth/refresh/'
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -166,7 +166,7 @@ class AuthenticationAPITestCase(APITestCase):
     def test_me_endpoint_authenticated(self):
         """Test GET /api/v1/auth/me/ with authentication"""
         self.authenticate_user()
-        
+
         url = '/api/v1/auth/me/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -214,7 +214,7 @@ class UserProfileAPITestCase(APITestCase):
     def test_get_profile_authenticated(self):
         """Test GET /api/v1/profile/ with authentication"""
         self.authenticate_user()
-        
+
         url = '/api/v1/profile/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -229,7 +229,7 @@ class UserProfileAPITestCase(APITestCase):
     def test_update_profile_authenticated(self):
         """Test PUT/PATCH /api/v1/profile/ with authentication"""
         self.authenticate_user()
-        
+
         url = '/api/v1/profile/'
         data = {
             'bio': 'Updated bio',
@@ -262,15 +262,15 @@ class UserProfileAPITestCase(APITestCase):
     def test_avatar_upload_authenticated(self):
         """Test avatar upload with authentication"""
         self.authenticate_user()
-        
+
         # Mock file upload
         from django.core.files.uploadedfile import SimpleUploadedFile
         image_file = SimpleUploadedFile(
-            "test_avatar.jpg", 
-            b"fake image content", 
+            "test_avatar.jpg",
+            b"fake image content",
             content_type="image/jpeg"
         )
-        
+
         url = '/api/v1/profile/'
         data = {'avatar': image_file}
         response = self.client.patch(url, data, format='multipart')
@@ -280,11 +280,11 @@ class UserProfileAPITestCase(APITestCase):
         """Test avatar upload without authentication"""
         from django.core.files.uploadedfile import SimpleUploadedFile
         image_file = SimpleUploadedFile(
-            "test_avatar.jpg", 
-            b"fake image content", 
+            "test_avatar.jpg",
+            b"fake image content",
             content_type="image/jpeg"
         )
-        
+
         url = '/api/v1/profile/'
         data = {'avatar': image_file}
         response = self.client.patch(url, data, format='multipart')
@@ -326,7 +326,7 @@ class AdminUserAPITestCase(APITestCase):
     def test_admin_user_list_access(self):
         """Test that admin users can access user lists"""
         self.authenticate_user(self.admin_user)
-        
+
         url = '/api/v1/admin/users/'
         response = self.client.get(url)
         # Should be successful if admin endpoints exist
@@ -334,7 +334,7 @@ class AdminUserAPITestCase(APITestCase):
     def test_regular_user_cannot_access_admin(self):
         """Test that regular users cannot access admin endpoints"""
         self.authenticate_user(self.regular_user)
-        
+
         url = '/api/v1/admin/users/'
         response = self.client.get(url)
         # Should return 403 or 404 depending on implementation
@@ -379,7 +379,7 @@ class UserPermissionTestCase(APITestCase):
     def test_user_can_only_edit_own_profile(self):
         """Test that users can only edit their own profile"""
         self.authenticate_user(self.user1)
-        
+
         # Try to edit own profile - should work
         url = '/api/v1/profile/'
         data = {'bio': 'My bio'}
@@ -389,7 +389,7 @@ class UserPermissionTestCase(APITestCase):
     def test_user_cannot_edit_other_profile(self):
         """Test that users cannot edit other user's profiles"""
         self.authenticate_user(self.user1)
-        
+
         # Try to edit other user's profile via direct URL if such endpoint exists
         url = f'/api/v1/users/{self.user2.username}/profile/'
         data = {'bio': 'Hacked bio'}
@@ -402,7 +402,7 @@ class UserPermissionTestCase(APITestCase):
             '/api/v1/profile/',
             '/api/v1/watchlist/',
         ]
-        
+
         for url in protected_urls:
             response = self.client.get(url)
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

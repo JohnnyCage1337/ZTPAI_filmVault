@@ -20,14 +20,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
-    'rest_framework.authtoken',  # Token authentication
-    'rest_framework_simplejwt',  # JWT authentication
-    'drf_spectacular',  # API documentation
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
     'corsheaders',
     'apps.movies',
     'users',
-    # 'interactions',
-    # 'people',
 ]
 
 MIDDLEWARE = [
@@ -105,7 +103,6 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
 }
 
-# drf-spectacular settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'FilmVault API',
     'DESCRIPTION': 'A comprehensive movie database and rating platform API',
@@ -123,7 +120,6 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# CORS configuration for frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -131,7 +127,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# CSRF configuration
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -139,7 +134,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# JWT Configuration
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -158,7 +152,6 @@ SIMPLE_JWT = {
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
 }
 
-# Session and Cookie configuration
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -167,7 +160,6 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 3600  # 1 hour
 
-# JWT Cookie settings
 JWT_AUTH_COOKIE = 'access_token'
 JWT_AUTH_REFRESH_COOKIE = 'refresh_token'
 JWT_AUTH_COOKIE_SECURE = False  # Set to True in production

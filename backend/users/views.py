@@ -20,7 +20,7 @@ def set_jwt_cookies(response, user):
     """Helper function to set JWT tokens as HttpOnly cookies"""
     refresh = RefreshToken.for_user(user)
     access_token = refresh.access_token
-    
+
     # Set access token cookie
     response.set_cookie(
         settings.JWT_AUTH_COOKIE,
@@ -30,7 +30,7 @@ def set_jwt_cookies(response, user):
         secure=settings.JWT_AUTH_COOKIE_SECURE,
         samesite=settings.JWT_AUTH_COOKIE_SAMESITE
     )
-    
+
     # Set refresh token cookie
     response.set_cookie(
         settings.JWT_AUTH_REFRESH_COOKIE,
@@ -40,7 +40,7 @@ def set_jwt_cookies(response, user):
         secure=settings.JWT_AUTH_COOKIE_SECURE,
         samesite=settings.JWT_AUTH_COOKIE_SAMESITE
     )
-    
+
     return response, str(access_token), str(refresh)
 
 @extend_schema(
@@ -81,7 +81,7 @@ def register_view(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        
+
         return Response({
             'message': 'Account created successfully. You can now log in.',
             'user': {
@@ -128,15 +128,15 @@ def login_view(request):
     serializer = UserLoginSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.validated_data['user']
-        
+
         response = Response({
             'message': 'Login successful',
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
-        
+
         # Set JWT cookies
         response, access_token, refresh_token = set_jwt_cookies(response, user)
-        
+
         return response
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -166,11 +166,11 @@ def logout_view(request):
     response = Response({
         'message': 'Logout successful'
     }, status=status.HTTP_200_OK)
-    
+
     # Clear JWT cookies
     response.delete_cookie(settings.JWT_AUTH_COOKIE)
     response.delete_cookie(settings.JWT_AUTH_REFRESH_COOKIE)
-    
+
     return response
 
 @extend_schema(
@@ -232,26 +232,26 @@ def refresh_token_view(request):
     Odświeżanie JWT tokenów z cookies
     """
     refresh_token = request.COOKIES.get(settings.JWT_AUTH_REFRESH_COOKIE)
-    
+
     if not refresh_token:
         return Response({
             'error': 'Refresh token not found'
         }, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     try:
         refresh = RefreshToken(refresh_token)
         user_id = refresh['user_id']
         user = User.objects.get(id=user_id)
-        
+
         response = Response({
             'message': 'Token refreshed successfully'
         }, status=status.HTTP_200_OK)
-        
+
         # Set new JWT cookies
         response, access_token, new_refresh_token = set_jwt_cookies(response, user)
-        
+
         return response
-        
+
     except (TokenError, User.DoesNotExist) as e:
         return Response({
             'error': 'Invalid refresh token'
@@ -293,7 +293,7 @@ def check_auth_view(request):
     Sprawdzenie czy użytkownik jest zalogowany z walidacją tokenu
     """
     access_token = request.COOKIES.get(settings.JWT_AUTH_COOKIE)
-    
+
     if request.user.is_authenticated and access_token:
         try:
             # Validate token
@@ -319,7 +319,7 @@ def check_auth_view(request):
                 'token_valid': False,
                 'error': 'Invalid token'
             }, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     return Response({'authenticated': False, 'token_valid': False})
 
 @extend_schema(
@@ -347,22 +347,22 @@ def update_user_role(request):
     """
     user_id = request.data.get('user_id')
     new_role = request.data.get('role')
-    
+
     if not user_id or not new_role:
         return Response({
             'error': 'user_id and role are required'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     if new_role not in ['user', 'admin']:
         return Response({
             'error': 'Invalid role. Must be user or admin'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         user = User.objects.get(id=user_id)
         user.userprofile.role = new_role
         user.userprofile.save()
-        
+
         return Response({
             'message': f'User role updated to {new_role}',
             'user': UserSerializer(user).data

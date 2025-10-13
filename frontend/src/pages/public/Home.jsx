@@ -21,7 +21,6 @@ const Home = ({ onMovieSelect, user }) => {
       try {
         setIsLoading(true);
 
-        // Fe0
         const homeData = await movieService.getHomeData();
 
         setTrendingMovies(homeData.trending.slice(0, 6));
@@ -30,7 +29,6 @@ const Home = ({ onMovieSelect, user }) => {
 
       } catch (error) {
         console.error('Error fetching movies:', error);
-        // Fallback to empty arrays on error
         setTrendingMovies([]);
         setTopRatedMovies([]);
         setPopularMovies([]);

@@ -34,7 +34,7 @@ class SessionManager {
     this.isChecking = true;
     try {
       const result = await authService.checkAuth();
-      
+
       if (!result.success) {
         if (result.expired) {
           this.handleSessionExpiry();
@@ -53,10 +53,10 @@ class SessionManager {
   handleSessionExpiry() {
     // Show user-friendly message
     this.showSessionExpiredNotification();
-    
+
     // Clear local data
     authService.logout();
-    
+
     // Redirect to login after delay
     setTimeout(() => {
       window.location.href = '/login?expired=true';
@@ -140,12 +140,12 @@ class SessionManager {
   // Cleanup method for component unmounting
   cleanup() {
     this.stopSessionCheck();
-    
+
     // Remove event listeners
     if (this.storageHandler) {
       window.removeEventListener('storage', this.storageHandler);
     }
-    
+
     if (this.visibilityHandler) {
       document.removeEventListener('visibilitychange', this.visibilityHandler);
     }

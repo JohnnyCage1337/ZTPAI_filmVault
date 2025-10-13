@@ -17,10 +17,8 @@ const SearchResults = ({ user }) => {
   const selectedGenre = searchParams.get('genre') || '';
   const sortBy = searchParams.get('sort') || 'relevance';
 
-  // Watchlist management
   const { watchlistStatus, toggleWatchlist } = useMultipleWatchlist(filteredMovies, user);
 
-  // Fetch genres on component mount
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -33,18 +31,15 @@ const SearchResults = ({ user }) => {
     fetchGenres();
   }, []);
 
-  // Filter and sort movies when dependencies change
   useEffect(() => {
     let filtered = [...movies];
 
-    // Filter by genre
     if (selectedGenre) {
       filtered = filtered.filter(movie =>
         movie.genres && movie.genres.some(genre => genre.slug === selectedGenre)
       );
     }
 
-    // Sort movies
     switch (sortBy) {
       case 'title':
         filtered.sort((a, b) => a.title.localeCompare(b.title));
@@ -55,7 +50,7 @@ const SearchResults = ({ user }) => {
       case 'rating':
         filtered.sort((a, b) => (parseFloat(b.vote_average) || 0) - (parseFloat(a.vote_average) || 0));
         break;
-      default: // relevance - keep original order
+      default: 
         break;
     }
 

@@ -42,24 +42,18 @@ from .filters import MovieFilter
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def home_page(request):
-    """
-    Home page endpoint that returns all data needed for the main page
-    """
     try:
-        # Get different categories of movies
         trending = Movie.objects.all().order_by('-popularity', '-vote_average')[:12]
         top_rated = Movie.objects.filter(vote_count__gte=10).order_by('-vote_average', '-popularity')[:12]
         popular = Movie.objects.all().order_by('-popularity')[:12]
         latest = Movie.objects.all().order_by('-release_date')[:12]
 
-        # Serialize the data
         context = {'request': request}
         trending_data = MovieListSerializer(trending, many=True, context=context).data
         top_rated_data = MovieListSerializer(top_rated, many=True, context=context).data
         popular_data = MovieListSerializer(popular, many=True, context=context).data
         latest_data = MovieListSerializer(latest, many=True, context=context).data
 
-        # Get genres
         genres = Genre.objects.all()
         genres_data = GenreSerializer(genres, many=True).data
 
@@ -69,7 +63,7 @@ def home_page(request):
             'popular': popular_data,
             'latest': latest_data,
             'genres': genres_data,
-            'hero_movies': trending_data[:3]  # Top 3 trending for hero section
+            'hero_movies': trending_data[:3]
         })
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -134,7 +128,6 @@ def search_movies(request):
         if not query:
             return Response({'results': [], 'count': 0})
 
-        # Search in title, overview, and original title
         movies = Movie.objects.filter(
             Q(title__icontains=query) |
             Q(overview__icontains=query) |

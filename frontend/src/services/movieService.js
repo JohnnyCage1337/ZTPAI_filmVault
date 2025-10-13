@@ -3,7 +3,6 @@ import { authService } from './authService.js';
 const API_BASE = 'http://localhost:8000';
 
 export default {
-  // Get home page data (all data in one request) - PUBLIC
   getHomeData: async () => {
     try {
       const response = await fetch(`${API_BASE}/api/v1/`, {
@@ -24,7 +23,6 @@ export default {
     }
   },
 
-  // Get all movies with optional filtering - PUBLIC
   getMovies: async (params = {}) => {
     try {
       const queryString = new URLSearchParams(params).toString();
@@ -46,7 +44,6 @@ export default {
     }
   },
 
-  // Get movie details by slug - PUBLIC
   getMovieDetails: async (slug) => {
     try {
       const response = await fetch(`${API_BASE}/api/v1/movies/${slug}/`, {
@@ -67,7 +64,6 @@ export default {
     }
   },
 
-  // Get trending movies - PUBLIC
   getTrendingMovies: async () => {
     try {
       const response = await fetch(`${API_BASE}/api/v1/movies/trending/`, {
@@ -109,7 +105,6 @@ export default {
     }
   },
 
-  // Get popular movies - PUBLIC
   getPopularMovies: async () => {
     try {
       const response = await fetch(`${API_BASE}/api/v1/movies/popular/`, {
@@ -130,7 +125,6 @@ export default {
     }
   },
 
-  // Rate a movie (requires authentication) - AUTH REQUIRED
   rateMovie: async (movieSlug, rating, review = '') => {
     try {
       const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/ratings/`, {
@@ -154,7 +148,6 @@ export default {
     }
   },
 
-  // Get user's rating for a movie - AUTH REQUIRED
   getUserRating: async (movieSlug) => {
     try {
       const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/ratings/me/`, {
@@ -178,7 +171,6 @@ export default {
     }
   },
 
-  // Toggle movie in watchlist - AUTH REQUIRED
   toggleWatchlist: async (movieSlug, add = true) => {
     try {
       const method = add ? 'POST' : 'DELETE';
@@ -203,7 +195,6 @@ export default {
     }
   },
 
-  // Check if movie is in user's watchlist - AUTH REQUIRED
   checkWatchlistStatus: async (movieSlug) => {
     try {
       const response = await authService.apiCall(`${API_BASE}/api/v1/movies/${movieSlug}/watchlist/status/`, {
@@ -225,7 +216,6 @@ export default {
     }
   },
 
-  // Get user's watchlist - AUTH REQUIRED
   getUserWatchlist: async () => {
     try {
       const response = await authService.apiCall(`${API_BASE}/api/v1/users/watchlist/`, {
@@ -247,7 +237,6 @@ export default {
     }
   },
 
-  // Get genres - PUBLIC
   getGenres: async () => {
     try {
       const response = await fetch(`${API_BASE}/api/v1/genres/`, {

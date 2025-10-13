@@ -1,7 +1,5 @@
-// Core JavaScript helper functions
 'use strict';
 
-// quickElement(tagType, parentReference [, textInChildNode, attribute, attributeValue ...]);
 function quickElement() {
     const obj = document.createElement(arguments[0]);
     if (arguments[2]) {
@@ -16,17 +14,12 @@ function quickElement() {
     return obj;
 }
 
-// "a" is reference to an object
 function removeChildren(a) {
     while (a.hasChildNodes()) {
         a.removeChild(a.lastChild);
     }
 }
 
-// ----------------------------------------------------------------------------
-// Find-position functions by PPK
-// See https://www.quirksmode.org/js/findpos.html
-// ----------------------------------------------------------------------------
 function findPosX(obj) {
     let curleft = 0;
     if (obj.offsetParent) {

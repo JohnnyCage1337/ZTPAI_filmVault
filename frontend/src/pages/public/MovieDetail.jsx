@@ -14,18 +14,15 @@ const MovieDetail = ({ onBack, user }) => {
       try {
         setIsLoading(true);
 
-        // Używamy slug z URL parametrów
         const movieData = await movieService.getMovieDetails(slug);
         setMovie(movieData);
 
-        // Sprawdź czy użytkownik ocenił film (tylko jeśli zalogowany)
         const token = localStorage.getItem('token');
         if (token) {
           try {
             const rating = await movieService.getUserRating(slug);
             setUserRating(rating.rating || 0);
           } catch {
-            // Użytkownik nie ocenił filmu
             setUserRating(0);
           }
 
@@ -56,7 +53,6 @@ const MovieDetail = ({ onBack, user }) => {
       await movieService.rateMovie(slug, rating);
     } catch (error) {
       console.error('Error rating movie:', error);
-      // Można dodać toast notification o błędzie
     }
   };
 
@@ -67,7 +63,6 @@ const MovieDetail = ({ onBack, user }) => {
       await movieService.toggleWatchlist(slug, newStatus);
     } catch (error) {
       console.error('Error updating watchlist:', error);
-      // Przywróć poprzedni stan w przypadku błędu
       setIsInWatchlist(!isInWatchlist);
     }
   };

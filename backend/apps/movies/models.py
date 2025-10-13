@@ -122,8 +122,7 @@ class MovieCast(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='cast')
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='filmography')
     character_name = models.CharField(max_length=100)
-    order = models.PositiveIntegerField(default=0)  # For cast ordering
-
+    order = models.PositiveIntegerField(default=0)  
     def __str__(self):
         return f"{self.person.name} as {self.character_name} in {self.movie.title}"
 

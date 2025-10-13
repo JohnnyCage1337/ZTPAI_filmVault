@@ -61,7 +61,7 @@ class MovieRatingModelTestCase(TestCase):
         """Test rating model creation and string representation"""
         user = User.objects.create_user(username="testuser", password="testpass")
         movie = Movie.objects.create(title="Test Movie", slug="test-movie")
-        
+
         rating = MovieRating.objects.create(
             movie=movie,
             user=user,
@@ -80,7 +80,7 @@ class WatchlistModelTestCase(TestCase):
         """Test watchlist model creation and string representation"""
         user = User.objects.create_user(username="testuser", password="testpass")
         movie = Movie.objects.create(title="Test Movie", slug="test-movie")
-        
+
         watchlist = Watchlist.objects.create(user=user, movie=movie)
         self.assertEqual(str(watchlist), "testuser - Test Movie")
 
@@ -202,7 +202,7 @@ class MovieAuthenticatedAPITestCase(APITestCase):
         self.authenticate_user()
         # First create a rating
         MovieRating.objects.create(movie=self.movie, user=self.user, rating=7)
-        
+
         url = f'/api/v1/movies/{self.movie.slug}/ratings/'
         data = {'rating': 9, 'review': 'Updated review'}
         response = self.client.put(url, data)
@@ -213,7 +213,7 @@ class MovieAuthenticatedAPITestCase(APITestCase):
         self.authenticate_user()
         # First create a rating
         MovieRating.objects.create(movie=self.movie, user=self.user, rating=7)
-        
+
         url = f'/api/v1/movies/{self.movie.slug}/ratings/'
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -267,11 +267,11 @@ class MovieFilteringAndPaginationTestCase(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        
+
         # Create genres
         self.action_genre = Genre.objects.create(name="Action", slug="action")
         self.comedy_genre = Genre.objects.create(name="Comedy", slug="comedy")
-        
+
         # Create movies
         self.action_movie = Movie.objects.create(
             title="Action Movie",
@@ -281,7 +281,7 @@ class MovieFilteringAndPaginationTestCase(APITestCase):
             vote_average=8.0
         )
         self.action_movie.genres.add(self.action_genre)
-        
+
         # Create multiple movies for pagination
         for i in range(10):
             Movie.objects.create(

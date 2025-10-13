@@ -33,7 +33,7 @@ function App() {
     };
 
     checkAuthStatus();
-    
+
     // Initialize session manager for automatic token refresh and expiry handling
     sessionManager.init();
 
