@@ -4,7 +4,7 @@ export const authService = {
   // Login with JWT cookies
   login: async (username, password) => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/login/`, {
+      const response = await fetch(`${API_BASE}/api/v1/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export const authService = {
   // Register with JWT cookies
   register: async (userData) => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/register/`, {
+      const response = await fetch(`${API_BASE}/api/v1/auth/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const authService = {
   // Logout with cookie clearing
   logout: async () => {
     try {
-      await fetch(`${API_BASE}/api/auth/logout/`, {
+      await fetch(`${API_BASE}/api/v1/auth/logout/`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -75,7 +75,7 @@ export const authService = {
   // Refresh token automatically
   refreshToken: async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/refresh/`, {
+      const response = await fetch(`${API_BASE}/api/v1/auth/refresh/`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -97,7 +97,7 @@ export const authService = {
   // Check authentication status with server
   checkAuth: async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/check/`, {
+      const response = await fetch(`${API_BASE}/api/v1/auth/check/`, {
         credentials: 'include',
       });
 

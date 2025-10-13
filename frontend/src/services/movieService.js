@@ -258,9 +258,13 @@ export default {
   },
 
   // Search movies - PUBLIC
-  searchMovies: async (query) => {
+  searchMovies: async (query, genre = null) => {
     try {
-      const response = await fetch(`${API_BASE}/api/v1/movies/search/?q=${encodeURIComponent(query)}`, {
+      const params = new URLSearchParams();
+      if (query) params.append('q', query);
+      if (genre) params.append('genre', genre);
+
+      const response = await fetch(`${API_BASE}/api/v1/movies/search/?${params.toString()}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'

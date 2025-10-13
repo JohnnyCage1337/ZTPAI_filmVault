@@ -95,9 +95,10 @@ class MovieListView(generics.ListAPIView):
 
 @extend_schema(
     summary="Search movies",
-    description="Search movies by title, overview, or original title with query parameter.",
+    description="Search movies by title, overview, or original title with optional genre filtering.",
     parameters=[
         OpenApiParameter('q', OpenApiTypes.STR, description='Search query string', required=False),
+        OpenApiParameter('genre', OpenApiTypes.STR, description='Filter by genre slug (e.g., action, comedy)', required=False),
     ],
     responses={
         200: OpenApiResponse(
@@ -121,18 +122,33 @@ class MovieListView(generics.ListAPIView):
 @permission_classes([IsAuthenticatedOrReadOnly])
 def search_movies(request):
     """
-    Search movies by title, overview, or original title
+    Search movies by title, overview, or original title with optional genre filtering
     """
     try:
         query = request.GET.get('q', '').strip()
-        if not query:
+        genre_slug = request.GET.get('genre', '').strip()
+
+        # Start with all movies
+        movies_qs = Movie.objects.all()
+
+        # Apply text search if query provided
+        if query:
+            movies_qs = movies_qs.filter(
+                Q(title__icontains=query) |
+                Q(overview__icontains=query) |
+                Q(og_title__icontains=query)
+            )
+
+        # Apply genre filter if provided
+        if genre_slug:
+            movies_qs = movies_qs.filter(genres__slug=genre_slug)
+
+        # If no filters provided, return empty results
+        if not query and not genre_slug:
             return Response({'results': [], 'count': 0})
 
-        movies = Movie.objects.filter(
-            Q(title__icontains=query) |
-            Q(overview__icontains=query) |
-            Q(og_title__icontains=query)
-        ).select_related('director').prefetch_related('genres', 'cast__person')[:20]
+        # Optimize query and limit results
+        movies = movies_qs.select_related('director').prefetch_related('genres', 'cast__person').distinct()[:20]
 
         context = {'request': request}
         movies_data = MovieListSerializer(movies, many=True, context=context).data
@@ -140,7 +156,8 @@ def search_movies(request):
         return Response({
             'results': movies_data,
             'count': len(movies_data),
-            'query': query
+            'query': query,
+            'genre': genre_slug
         })
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

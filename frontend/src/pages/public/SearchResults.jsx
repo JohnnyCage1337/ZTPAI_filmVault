@@ -34,12 +34,7 @@ const SearchResults = ({ user }) => {
   useEffect(() => {
     let filtered = [...movies];
 
-    if (selectedGenre) {
-      filtered = filtered.filter(movie =>
-        movie.genres && movie.genres.some(genre => genre.slug === selectedGenre)
-      );
-    }
-
+    // Only apply sorting (genre filtering now handled by API)
     switch (sortBy) {
       case 'title':
         filtered.sort((a, b) => a.title.localeCompare(b.title));
@@ -50,12 +45,12 @@ const SearchResults = ({ user }) => {
       case 'rating':
         filtered.sort((a, b) => (parseFloat(b.vote_average) || 0) - (parseFloat(a.vote_average) || 0));
         break;
-      default: 
+      default:
         break;
     }
 
     setFilteredMovies(filtered);
-  }, [movies, selectedGenre, sortBy]);
+  }, [movies, sortBy]);
 
   const handleGenreChange = (genreSlug) => {
     const newParams = new URLSearchParams(searchParams);
@@ -75,7 +70,7 @@ const SearchResults = ({ user }) => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query.trim()) {
+      if (!query.trim() && !selectedGenre) {
         navigate('/');
         return;
       }
@@ -83,7 +78,7 @@ const SearchResults = ({ user }) => {
       try {
         setIsLoading(true);
         setError(null);
-        const results = await movieService.searchMovies(query);
+        const results = await movieService.searchMovies(query, selectedGenre);
         setMovies(results.results || []);
       } catch (err) {
         console.error('Search error:', err);
@@ -94,7 +89,7 @@ const SearchResults = ({ user }) => {
     };
 
     fetchResults();
-  }, [query, navigate]);
+  }, [query, selectedGenre, navigate]);
 
   if (isLoading) {
     return (
@@ -146,7 +141,7 @@ const SearchResults = ({ user }) => {
             fontSize: '18px',
             margin: 0
           }}>
-            {error ? error : `Znaleziono ${filteredMovies.length} filmów dla "${query}"`}
+            {error ? error : `Znaleziono ${filteredMovies.length} filmów${query ? ` dla "${query}"` : ''}${selectedGenre ? ` w gatunku "${genres.find(g => g.slug === selectedGenre)?.name || selectedGenre}"` : ''}`}
           </p>
         </div>
 
@@ -242,7 +237,7 @@ const SearchResults = ({ user }) => {
               Brak wyników
             </h3>
             <p style={{ color: '#94a3b8', margin: 0 }}>
-              Nie znaleziono filmów pasujących do wyszukiwania "{query}"
+              Nie znaleziono filmów{query ? ` pasujących do wyszukiwania "${query}"` : ''}{selectedGenre ? ` w gatunku "${genres.find(g => g.slug === selectedGenre)?.name || selectedGenre}"` : ''}
             </p>
           </div>
         )}
